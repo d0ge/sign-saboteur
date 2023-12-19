@@ -45,7 +45,6 @@ public class ExtensionTab {
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
         wordlistView = new WordlistView(parent, keysModel, presenters, keysModelPersistence, userInterface);
         settingsView = new SettingsView(parent, burpConfig, userInterface);
     }

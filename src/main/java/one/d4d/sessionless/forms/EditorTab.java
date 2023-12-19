@@ -304,7 +304,6 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
 
         panelDangerousSignature = new JPanel(new BorderLayout());
         codeAreaDangerousSignature = hexCodeAreaFactory.build();

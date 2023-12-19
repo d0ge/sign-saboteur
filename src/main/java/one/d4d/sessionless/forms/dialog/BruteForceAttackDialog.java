@@ -83,7 +83,6 @@ public class BruteForceAttackDialog extends AbstractDialog {
 
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
         progressBarBruteForce = new JProgressBar(0, 100);
         progressBarBruteForce.setIndeterminate(true);
     }
