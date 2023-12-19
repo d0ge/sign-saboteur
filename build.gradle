@@ -1,0 +1,77 @@
+
+plugins {
+    id 'java-library'
+}
+
+group = 'one.d4d'
+version = '0.0.1'
+description = 'token-signer'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = uri('https://www.jetbrains.com/intellij-repository/releases') }
+    maven { url = uri('https://packages.jetbrains.team/maven/p/ij/intellij-dependencies/') }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+configurations {
+    guiGenerationTask
+}
+
+dependencies {
+    guiGenerationTask(
+            "com.jetbrains.intellij.java:java-compiler-ant-tasks:${gui_designer_version}"
+    )
+    compileOnly(
+            "net.portswigger.burp.extensions:montoya-api:${extender_version}"
+    )
+    api(
+            "com.google.guava:guava:32.1.1-jre",
+            "com.google.code.gson:gson:2.10.1",
+            "com.jetbrains.intellij.java:java-gui-forms-rt:${gui_designer_version}",
+            'com.nimbusds:nimbus-jose-jwt:9.21',
+            'org.exbin.deltahex:deltahex-swing:0.1.2',
+            'com.fifesoft:rsyntaxtextarea:3.3.3',
+            'org.json:json:20230227',
+            'org.apache.commons:commons-lang3:3.12.0'
+    )
+    testImplementation(
+            "net.portswigger.burp.extensions:montoya-api:${extender_version}",
+            'org.junit.jupiter:junit-jupiter:5.9.3',
+            'org.assertj:assertj-core:3.24.2',
+            'org.mockito:mockito-core:5.3.1'
+    )
+}
+
+tasks.withType(JavaCompile).configureEach {
+    doLast {
+        project.sourceSets.main.output.classesDirs.each { project.mkdir(it) }
+
+        ant.taskdef name: 'javac2', classname: 'com.intellij.ant.Javac2', classpath: configurations.guiGenerationTask.asPath
+
+        ant.javac2 srcdir: project.sourceSets.main.java.srcDirs.join(':'),
+                classpath: project.sourceSets.main.compileClasspath.asPath,
+                destdir: project.sourceSets.main.output.classesDirs.getSingleFile(),
+                source: sourceCompatibility,
+                target: targetCompatibility,
+                includeAntRuntime: false
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    dependsOn test
+    archiveBaseName = project.name
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

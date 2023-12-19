@@ -1,0 +1,8 @@
+"salt"
+"cookie-session"
+"django.core.signing"
+"django.core.signing.TimestampSigner"
+"django.core.signing.get_cookie_signer"
+"django.contrib.sessions.backends.signed_cookies"
+"flask-oidc-cookie"
+"flask-oidc-extra-data"
