@@ -44,7 +44,7 @@ public class BruteForce {
                         s.setKeyDerivation(d);
                         s.setSecretKey(secret.getBytes());
                         attacks.add(s);
-                    } else if (d == Derivation.HASH) {
+                    } else if (d == Derivation.HASH ) {
                         for (MessageDigestAlgorithm m : MessageDigestAlgorithm.values()) {
                             TokenSigner s = is.clone();
                             s.setKeyDerivation(d);
@@ -54,12 +54,15 @@ public class BruteForce {
                         }
                     } else {
                         if (d == Derivation.PBKDF2HMAC && scanConfiguration != Attack.Deep) continue;
-                        for (String salt : salts) {
-                            TokenSigner s = is.clone();
-                            s.setKeyDerivation(d);
-                            s.setSecretKey(secret.getBytes());
-                            s.setSalt(salt.getBytes());
-                            attacks.add(s);
+                        for (MessageDigestAlgorithm m : MessageDigestAlgorithm.values()) {
+                            for (String salt : salts) {
+                                TokenSigner s = is.clone();
+                                s.setKeyDerivation(d);
+                                s.setSecretKey(secret.getBytes());
+                                s.setSalt(salt.getBytes());
+                                s.setMessageDigestAlgorithm(m);
+                                attacks.add(s);
+                            }
                         }
                     }
                 }

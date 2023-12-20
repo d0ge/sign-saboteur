@@ -2,6 +2,7 @@ package one.d4d.sessionless.itsdangerous.crypto;
 
 import one.d4d.sessionless.itsdangerous.Algorithms;
 import one.d4d.sessionless.itsdangerous.Derivation;
+import one.d4d.sessionless.itsdangerous.MessageDigestAlgorithm;
 import one.d4d.sessionless.keys.SecretKey;
 
 public class DjangoTokenSigner extends DangerousTokenSigner {
@@ -24,5 +25,14 @@ public class DjangoTokenSigner extends DangerousTokenSigner {
 
     public DjangoTokenSigner(String digestMethod, String keyDerivation, byte[] secret_key, byte[] salt, byte sep) {
         super(digestMethod, keyDerivation, secret_key, salt, sep);
+    }
+    public DjangoTokenSigner(
+            Algorithms algorithm,
+            Derivation keyDerivation,
+            MessageDigestAlgorithm digest,
+            byte[] secret_key,
+            byte[] salt,
+            byte sep) {
+        super(algorithm, keyDerivation, digest, secret_key, salt, sep);
     }
 }
