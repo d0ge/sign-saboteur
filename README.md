@@ -1,6 +1,6 @@
 # Sessionless
 
-Sessionless is a Burp Suite extension for editing, signing, verifying, attacking signed tokens: Django, Dangerous, Flask, Express, [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy) and Tornado.
+Sessionless is a Burp Suite extension for editing, signing, verifying, attacking signed tokens: [Django TimestampSigner](https://docs.djangoproject.com/en/5.0/topics/signing/#verifying-timestamped-values), [ItsDangerous Signer](https://itsdangerous.palletsprojects.com/en/2.1.x/signer/), [Express cookie-session middleware](https://expressjs.com/en/resources/middleware/cookie-session.html), [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy) and [Tornado’s signed cookies](https://www.tornadoweb.org/en/stable/guide/security.html).
 
 It provides automatic detection and in-line editing of token within HTTP requests/responses and WebSocket messages, signing of tokens and automation of brute force attacks against signed tokens implementations.
 
