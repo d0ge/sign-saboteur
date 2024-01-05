@@ -49,6 +49,7 @@ class KeysTableModel extends AbstractTableModel {
             case SECRET -> key.getSecret();
             case ALGORITHM -> key.getDigestMethod();
             case DERIVATION -> key.getKeyDerivation();
+            case MESSAGE_DERIVATION -> key.getMessageDerivation();
             case DIGEST -> key.getMessageDigestAlgorythm();
         };
     }

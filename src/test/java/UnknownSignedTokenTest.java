@@ -1,13 +1,17 @@
 import com.google.common.collect.Lists;
 import one.d4d.sessionless.itsdangerous.*;
 import one.d4d.sessionless.itsdangerous.crypto.DjangoTokenSigner;
+import one.d4d.sessionless.itsdangerous.model.SignedToken;
+import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
 import one.d4d.sessionless.itsdangerous.model.UnknownSignedToken;
 import one.d4d.sessionless.keys.SecretKey;
 import one.d4d.sessionless.utils.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class UnknownSignedTokenTest {
     @Test
@@ -19,7 +23,7 @@ public class UnknownSignedTokenTest {
                 "eyJtZXNzYWdlIjoiSGVsbG8hIn0",
                 "V1O2qShdoisLMx2d0JTmVQecu8zsLPeXmTM5Id3ll",
                 (byte)':');
-        DjangoTokenSigner s = new DjangoTokenSigner(Algorithms.SHA256, Derivation.DJANGO, MessageDigestAlgorithm.SHA256,secret, salt, (byte) ':');
+        DjangoTokenSigner s = new DjangoTokenSigner(Algorithms.SHA256, Derivation.DJANGO, MessageDerivation.NONE, MessageDigestAlgorithm.SHA256,secret, salt, (byte) ':');
         token.setSigner(s);
         Assertions.assertDoesNotThrow( ()-> {
             s.unsign(value.getBytes());
@@ -35,8 +39,9 @@ public class UnknownSignedTokenTest {
                 (byte)':');
         final List<String> secrets = Utils.readResourceForClass("/secrets", this.getClass());
         final List<String> salts = Utils.readResourceForClass("/salts", this.getClass());
+        final List<SecretKey> knownKeys = new ArrayList<>();
         secrets.add(secret);
-        BruteForce bf = new BruteForce(secrets, salts, Attack.Balanced, token);
+        BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.Balanced, token);
         SecretKey sk = bf.search();
         Assertions.assertNotNull(sk);
     }
@@ -49,8 +54,9 @@ public class UnknownSignedTokenTest {
                 (byte)':');
         final List<String> secrets = Utils.readResourceForClass("/secrets", this.getClass());
         final List<String> salts = Utils.readResourceForClass("/salts", this.getClass());
+        final List<SecretKey> knownKeys = new ArrayList<>();
         secrets.add(secret);
-        BruteForce bf = new BruteForce(secrets, salts, Attack.Balanced, token);
+        BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.Balanced, token);
         SecretKey sk = bf.search();
         Assertions.assertNotNull(sk);
     }
@@ -62,7 +68,8 @@ public class UnknownSignedTokenTest {
                 (byte)'.');
         final List<String> secrets = Lists.newArrayList("secret key");
         final List<String> salts = Lists.newArrayList("auth");
-        BruteForce bf = new BruteForce(secrets, salts, Attack.Balanced, token);
+        final List<SecretKey> knownKeys = new ArrayList<>();
+        BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.Balanced, token);
         SecretKey sk = bf.search();
         Assertions.assertNotNull(sk);
     }
@@ -74,7 +81,8 @@ public class UnknownSignedTokenTest {
                 (byte)'.');
         final List<String> secrets = Lists.newArrayList("secret-key");
         final List<String> salts = Lists.newArrayList("itsdangerous.Signer");
-        BruteForce bf = new BruteForce(secrets, salts, Attack.Balanced, token);
+        final List<SecretKey> knownKeys = new ArrayList<>();
+        BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.Balanced, token);
         SecretKey sk = bf.search();
         Assertions.assertNotNull(sk);
     }
@@ -86,8 +94,25 @@ public class UnknownSignedTokenTest {
                 (byte)'.');
         final List<String> secrets = Lists.newArrayList("c292a0a3aa32397cdb050e233733900f");
         final List<String> salts = Lists.newArrayList("itsdangerous");
-        BruteForce bf = new BruteForce(secrets, salts, Attack.Balanced, token);
+        final List<SecretKey> knownKeys = new ArrayList<>();
+        BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.Balanced, token);
         SecretKey sk = bf.search();
         Assertions.assertNotNull(sk);
+    }
+    @Test
+    void UnknownSignedStringParserTest() {
+        final List<String> secrets = List.of("c292a0a3aa32397cdb050e233733900f");
+        final List<String> salts = List.of("itsdangerous");
+        final List<SecretKey> knownKeys = new ArrayList<>();
+        String value = "IjEi.YhAmmQ.cdQp7CnnVq02aQ05y8tSBddl-qs";
+        Optional<SignedToken> optionalToken = SignedTokenObjectFinder.parseUnknownSignedString(value);
+        if (optionalToken.isPresent()) {
+            UnknownSignedToken token = (UnknownSignedToken) optionalToken.get();
+            BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.Balanced, token);
+            SecretKey sk = bf.search();
+            Assertions.assertNotNull(sk);
+        } else {
+            Assertions.fail("Token not found.");
+        }
     }
 }

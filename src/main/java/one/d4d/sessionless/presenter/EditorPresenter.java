@@ -3,7 +3,7 @@ package one.d4d.sessionless.presenter;
 import burp.api.montoya.collaborator.CollaboratorPayloadGenerator;
 import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
-import com.nimbusds.jwt.JWTClaimsSet;
+import burp.config.SignerConfig;
 import one.d4d.sessionless.forms.EditorTab;
 import one.d4d.sessionless.forms.MessageDialogFactory;
 import one.d4d.sessionless.forms.dialog.*;
@@ -22,6 +22,7 @@ import static one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder.con
 
 public class EditorPresenter extends Presenter {
     private final PresenterStore presenters;
+    private final SignerConfig signerConfig;
     private final EditorModel model;
     private final EditorTab view;
     private final CollaboratorPayloadGenerator collaboratorPayloadGenerator;
@@ -34,14 +35,16 @@ public class EditorPresenter extends Presenter {
             EditorTab view,
             CollaboratorPayloadGenerator collaboratorPayloadGenerator,
             ErrorLoggingActionListenerFactory actionListenerFactory,
-            PresenterStore presenters) {
+            PresenterStore presenters,
+            SignerConfig signerConfig) {
         this.view = view;
-        this.model = new EditorModel();
+        this.model = new EditorModel(signerConfig);
         this.collaboratorPayloadGenerator = collaboratorPayloadGenerator;
         this.actionListenerFactory = actionListenerFactory;
         this.presenters = presenters;
         messageDialogFactory = new MessageDialogFactory(view.uiComponent());
         presenters.register(this);
+        this.signerConfig = signerConfig;
     }
 
     public void setMessage(String content, URL targetURL, List<Cookie> cookies, List<ParsedHttpParameter> params) {
@@ -158,6 +161,20 @@ public class EditorPresenter extends Presenter {
         view.setTornadoValue(token.getValue());
         view.setTornadoSignature(token.getSignature());
     }
+    private UnknownSignedToken getUnknown() {
+
+        String message = view.getUnknownMessage();
+        String signature = view.getUnknownSignature();
+        byte[] separator = view.getUnknownSeparator().length == 0 ? new byte[]{46} : view.getUnknownSeparator();
+
+        return new UnknownSignedToken(message,signature,separator[0]);
+    }
+
+    private void setUnknown(UnknownSignedToken token) {
+        view.setUnknownMessage(token.getEncodedMessage());
+        view.setUnknownSignature(token.getEncodedSignature());
+        view.setUnknownSeparator(token.getSeparator());
+    }
 
 
     public void componentChanged() {
@@ -169,23 +186,7 @@ public class EditorPresenter extends Presenter {
             case EditorTab.TAB_EXPRESS -> tokenObject = getExpress();
             case EditorTab.TAB_OAUTH -> tokenObject = getOAuth();
             case EditorTab.TAB_TORNADO -> tokenObject = getTornado();
-            default -> tokenObject = new SignedToken("Blank") {
-                @Override
-                public String serialize() {
-                    return null;
-                }
-
-
-                @Override
-                public void resign() throws Exception {
-
-                }
-
-                @Override
-                public void setClaims(JWTClaimsSet claims) {
-
-                }
-            };
+            default -> tokenObject = getUnknown();
         }
         mutableSignedTokenObject.setModified(tokenObject);
         view.setSignedToken(tokenObject.serialize(), mutableSignedTokenObject.changed() && !selectionChanging);
@@ -209,6 +210,9 @@ public class EditorPresenter extends Presenter {
         } else if (tokenObject instanceof TornadoSignedToken) {
             view.setTornadoMode();
             setTornado((TornadoSignedToken) tokenObject);
+        } else if (tokenObject instanceof UnknownSignedToken) {
+            view.setUnknownMode();
+            setUnknown((UnknownSignedToken) tokenObject);
         }
         selectionChanging = false;
     }
@@ -258,6 +262,9 @@ public class EditorPresenter extends Presenter {
             } else if (signed instanceof TornadoSignedToken) {
                 view.setTornadoMode();
                 setTornado((TornadoSignedToken) signed);
+            } else if (signed instanceof UnknownSignedToken) {
+                view.setUnknownMode();
+                setUnknown((UnknownSignedToken) signed);
             }
         }
     }
@@ -294,6 +301,9 @@ public class EditorPresenter extends Presenter {
             } else if (signed instanceof TornadoSignedToken) {
                 view.setTornadoMode();
                 setTornado((TornadoSignedToken) signed);
+            } else if (signed instanceof UnknownSignedToken) {
+                view.setUnknownMode();
+                setUnknown((UnknownSignedToken) signed);
             }
         }
     }
@@ -322,6 +332,7 @@ public class EditorPresenter extends Presenter {
                 actionListenerFactory,
                 attackKeys,
                 attackSalts,
+                keysPresenter.getSigningKeys(),
                 mode,
                 tokenObject);
         bruteForceDialog.display();
@@ -340,6 +351,9 @@ public class EditorPresenter extends Presenter {
         }
     }
 
+    public void onAttackKnownKeysClicked() {
+        onAttackClicked(Attack.KNOWN);
+    }
     public void onAttackFastClicked() {
         onAttackClicked(Attack.FAST);
     }
@@ -353,7 +367,7 @@ public class EditorPresenter extends Presenter {
     }
 
     public boolean isEnabled(String text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
-        return containsSignedTokenObjects(text, cookies, params);
+        return containsSignedTokenObjects(signerConfig, text, cookies, params);
     }
 
     public String getMessage() {

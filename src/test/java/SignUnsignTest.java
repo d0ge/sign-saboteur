@@ -8,6 +8,7 @@ import one.d4d.sessionless.utils.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,8 +31,9 @@ public class SignUnsignTest {
                         token.setSigner(s);
                         final List<String> secrets = List.of("secret");
                         final List<String> salts = List.of("cookie-session");
+                        final List<SecretKey> knownKeys = new ArrayList<>();
 
-                        BruteForce bf = new BruteForce(secrets, salts, Attack.Deep, token);
+                        BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.Deep, token);
                         SecretKey sk = bf.search();
                         Assertions.assertNotNull(sk);
                     }

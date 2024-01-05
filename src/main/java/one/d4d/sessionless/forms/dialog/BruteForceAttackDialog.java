@@ -25,6 +25,7 @@ public class BruteForceAttackDialog extends AbstractDialog {
             ErrorLoggingActionListenerFactory actionListenerFactory,
             List<String> signingSecrets,
             List<String> signingSalts,
+            List<SecretKey> signingKeys,
             Attack mode,
             SignedToken token
     ) {
@@ -56,16 +57,17 @@ public class BruteForceAttackDialog extends AbstractDialog {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         // Logic
-        lblStatus.setText(String.format(
+        String lblText = String.format(
                 Utils.getResourceString("attack_dialog_progress_bar_status"),
-                signingSecrets.size(),
-                signingSalts.size(),
+                mode == Attack.KNOWN ? signingKeys.size() : signingSecrets.size(),
+                mode == Attack.KNOWN ? signingKeys.size() : signingSalts.size(),
                 mode.getName()
-        ));
+        );
+        lblStatus.setText(lblText);
         SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
-                BruteForce bf = new BruteForce(signingSecrets, signingSalts, mode, token);
+                BruteForce bf = new BruteForce(signingSecrets, signingSalts, signingKeys, mode, token);
                 SecretKey k = bf.search();
                 if (k != null) {
                     secretKey = k;

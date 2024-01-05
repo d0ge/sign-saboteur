@@ -2,6 +2,7 @@ package one.d4d.sessionless.forms.dialog;
 
 import one.d4d.sessionless.itsdangerous.Algorithms;
 import one.d4d.sessionless.itsdangerous.Derivation;
+import one.d4d.sessionless.itsdangerous.MessageDerivation;
 import one.d4d.sessionless.itsdangerous.MessageDigestAlgorithm;
 import one.d4d.sessionless.keys.Key;
 import one.d4d.sessionless.keys.SecretKey;
@@ -29,6 +30,7 @@ public class NewKeyDialog extends KeyDialog {
     private JTextField textFieldKeyID;
     private JCheckBox checkBoxSecretJSON;
     private JCheckBox checkBoxSaltJSON;
+    private JComboBox comboBoxMessageDerivation;
 
     private SecretKey key;
 
@@ -43,6 +45,7 @@ public class NewKeyDialog extends KeyDialog {
                 "",
                 Algorithms.SHA1,
                 Derivation.HMAC,
+                MessageDerivation.NONE,
                 MessageDigestAlgorithm.SHA1);
         originalId = null;
     }
@@ -58,6 +61,7 @@ public class NewKeyDialog extends KeyDialog {
                 key.getSeparator(),
                 key.getDigestMethod(),
                 key.getKeyDerivation(),
+                key.getMessageDerivation(),
                 key.getMessageDigestAlgorythm()
         );
     }
@@ -72,6 +76,7 @@ public class NewKeyDialog extends KeyDialog {
             String separator,
             Algorithms algorithms,
             Derivation derivation,
+            MessageDerivation messageDerivation,
             MessageDigestAlgorithm digest) {
         super(parent, TITLE_RESOURCE_ID);
         this.presenters = presenters;
@@ -109,6 +114,8 @@ public class NewKeyDialog extends KeyDialog {
         comboBoxDigest.setSelectedItem(digest);
         comboBoxDerivation.setModel(new DefaultComboBoxModel<>(Derivation.values()));
         comboBoxDerivation.setSelectedItem(derivation);
+        comboBoxMessageDerivation.setModel(new DefaultComboBoxModel<>(MessageDerivation.values()));
+        comboBoxMessageDerivation.setSelectedItem(messageDerivation);
     }
 
     private void checkInput() {
@@ -133,6 +140,7 @@ public class NewKeyDialog extends KeyDialog {
                 textFieldSeparator.getText(),
                 (Algorithms) comboBoxAlgorythm.getSelectedItem(),
                 (Derivation) comboBoxDerivation.getSelectedItem(),
+                (MessageDerivation) comboBoxMessageDerivation.getSelectedItem(),
                 (MessageDigestAlgorithm) comboBoxDigest.getSelectedItem()
         );
         super.onOK();

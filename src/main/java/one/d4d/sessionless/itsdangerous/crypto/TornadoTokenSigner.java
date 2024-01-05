@@ -14,7 +14,7 @@ public class TornadoTokenSigner extends TokenSigner{
         super(key);
     }
     public TornadoTokenSigner() {
-        super(Algorithms.SHA1, Derivation.NONE, MessageDigestAlgorithm.NONE,new byte[] {}, new byte[] {}, (byte) '|');
+        super(Algorithms.SHA1, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE,new byte[] {}, new byte[] {}, (byte) '|');
     }
     public TornadoTokenSigner( byte sep) {
         super(new byte[] {}, sep);

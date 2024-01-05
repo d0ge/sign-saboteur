@@ -1,6 +1,7 @@
 import com.nimbusds.jwt.JWTClaimsSet;
 import one.d4d.sessionless.itsdangerous.Algorithms;
 import one.d4d.sessionless.itsdangerous.Derivation;
+import one.d4d.sessionless.itsdangerous.MessageDerivation;
 import one.d4d.sessionless.itsdangerous.MessageDigestAlgorithm;
 import one.d4d.sessionless.keys.SecretKey;
 import one.d4d.sessionless.utils.ClaimsUtils;
@@ -69,7 +70,15 @@ public class ClaimsTest {
     @Test
     void UserAccessTokenPayloadTest() {
         try {
-            SecretKey key = new SecretKey("1", "secret", "",".", Algorithms.SHA256, Derivation.NONE, MessageDigestAlgorithm.NONE);
+            SecretKey key = new SecretKey(
+                    "1",
+                    "secret",
+                    "",
+                    ".",
+                    Algorithms.SHA256,
+                    Derivation.NONE,
+                    MessageDerivation.NONE,
+                    MessageDigestAlgorithm.NONE);
             URL target = new URL("https://d4d.one/");
             ClaimsUtils.generateUserAccessTokenPayload(target, key);
         } catch (MalformedURLException e) {

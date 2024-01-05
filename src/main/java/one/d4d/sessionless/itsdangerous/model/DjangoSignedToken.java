@@ -2,13 +2,14 @@ package one.d4d.sessionless.itsdangerous.model;
 
 import one.d4d.sessionless.itsdangerous.Algorithms;
 import one.d4d.sessionless.itsdangerous.Derivation;
+import one.d4d.sessionless.itsdangerous.MessageDerivation;
 import one.d4d.sessionless.itsdangerous.MessageDigestAlgorithm;
 import one.d4d.sessionless.utils.Utils;
 
 public class DjangoSignedToken extends DangerousSignedToken {
 
     public DjangoSignedToken(byte separator, String payload, String timestamp, String signature) {
-        super(separator, payload, timestamp, signature, Algorithms.SHA1, Derivation.DJANGO, MessageDigestAlgorithm.SHA1);
+        super(separator, payload, timestamp, signature, Algorithms.SHA1, Derivation.DJANGO, MessageDerivation.NONE, MessageDigestAlgorithm.SHA1);
     }
 
     @Override

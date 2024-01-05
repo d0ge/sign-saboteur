@@ -1,6 +1,6 @@
 # Sessionless
 
-Sessionless is a Burp Suite extension for editing, signing, verifying, attacking signed tokens: [Django TimestampSigner](https://docs.djangoproject.com/en/5.0/topics/signing/#verifying-timestamped-values), [ItsDangerous Signer](https://itsdangerous.palletsprojects.com/en/2.1.x/signer/), [Express cookie-session middleware](https://expressjs.com/en/resources/middleware/cookie-session.html), [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy) and [Tornado’s signed cookies](https://www.tornadoweb.org/en/stable/guide/security.html).
+Sessionless is a Burp Suite extension for editing, signing, verifying, attacking signed tokens: [Django TimestampSigner](https://docs.djangoproject.com/en/5.0/topics/signing/#verifying-timestamped-values), [ItsDangerous Signer](https://itsdangerous.palletsprojects.com/en/2.1.x/signer/), [Express cookie-session middleware](https://expressjs.com/en/resources/middleware/cookie-session.html), [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy), [Tornado’s signed cookies](https://www.tornadoweb.org/en/stable/guide/security.html) and Unknown signed string.
 
 It provides automatic detection and in-line editing of token within HTTP requests/responses and WebSocket messages, signing of tokens and automation of brute force attacks against signed tokens implementations.
 
@@ -24,6 +24,14 @@ The `Wordlist View` allows to import secrets and salts list files. Extension has
 The `Editor View` supports a number of signed tokens: Django, Dangerous, Flask, Express, OAuth2 and Tornado. It allows modification of the signed tokens at Burp Suite's HTTP Request/Response view in the Proxy, History and Repeater tools.
 
 The Dangerous tab can be used for both, `Flask` and `Django` tokens, which are selected depending on whether a Dangerous or Django token is detected.
+
+The Unknown tab can be used to brute force unknown signed strings. Guessing mode works only with _Balanced_ brute force attack. It supports different message derivation technics, including:
+
+* _None_ message will be used as is
+* _CONCAT_ separator byte will be removed from the message and that new value will be used to calculate signature
+* _Tornado_ separator byte will be added to the end of the message string
+
+<img src="gitimg/unknown_tab.png" width="400"/>
 
 ### Editable Fields
 
@@ -55,6 +63,7 @@ A hex editor is provided to all signed tokens, except Express signatures. __NOTE
 
 The `Brute force` option implements three types of attacks against signed tokens Signatures:
 
+* _Known keys_ will use previously found secret keys only
 * _Fast_ will use default hashing algorithm and key derivation
 * _Balanced_ will use all known key derivation technics, except PBKDF2HMAC
 * _Deep_ will use all key derivation technics, including PBKDF2HMAC

@@ -21,6 +21,7 @@ import java.util.UUID;
 public class TokenSigner implements Cloneable {
     public Algorithms digestMethod = Algorithms.SHA1;
     public Derivation keyDerivation = Derivation.HMAC;
+    public MessageDerivation messageDerivation = MessageDerivation.NONE;
     public MessageDigestAlgorithm messageDigestAlgorithm = MessageDigestAlgorithm.SHA1;
     public byte[] secret_key;
     public byte[] salt = "itsdangerous.Signer".getBytes();
@@ -40,6 +41,7 @@ public class TokenSigner implements Cloneable {
     public TokenSigner(SecretKey key) {
         this.digestMethod = key.getDigestMethod();
         this.keyDerivation = key.getKeyDerivation();
+        this.messageDerivation = key.getMessageDerivation();
         this.secret_key = key.getSecret().getBytes();
         this.salt = key.getSalt().getBytes();
         this.sep = key.getSeparator().getBytes().length > 0 ? key.getSeparator().getBytes()[0] : 46;
@@ -54,9 +56,10 @@ public class TokenSigner implements Cloneable {
         this.sep = sep;
     }
 
-    public TokenSigner(Algorithms digestMethod, Derivation keyDerivation, MessageDigestAlgorithm digest, byte[] secret_key, byte[] salt, byte sep) {
+    public TokenSigner(Algorithms digestMethod, Derivation keyDerivation, MessageDerivation messageDerivation, MessageDigestAlgorithm digest, byte[] secret_key, byte[] salt, byte sep) {
         this.digestMethod = digestMethod;
         this.keyDerivation = keyDerivation;
+        this.messageDerivation = messageDerivation;
         this.messageDigestAlgorithm = digest;
         this.secret_key = secret_key;
         this.salt = salt;
@@ -77,6 +80,14 @@ public class TokenSigner implements Cloneable {
 
     public void setKeyDerivation(Derivation keyDerivation) {
         this.keyDerivation = keyDerivation;
+    }
+
+    public void setMessageDerivation(MessageDerivation messageDerivation) {
+        this.messageDerivation = messageDerivation;
+    }
+
+    public MessageDerivation getMessageDerivation() {
+        return messageDerivation;
     }
 
     public MessageDigestAlgorithm getMessageDigestAlgorythm() {
@@ -112,6 +123,19 @@ public class TokenSigner implements Cloneable {
         this.messageDigestAlgorithm = messageDigestAlgorithm;
     }
 
+    public byte[] derive_message(byte[] value) {
+        switch (messageDerivation){
+            case TORNADO -> {
+                return Bytes.concat(value, new byte[] {sep});
+            }
+            case CONCAT -> {
+                return Bytes.concat(Utils.split(value, sep));
+            }
+            default -> {
+                return value;
+            }
+        }
+    }
     public byte[] derive_key() throws DerivationException {
         try {
             if (messageDigestAlgorithm == MessageDigestAlgorithm.NONE) return secret_key;
@@ -181,11 +205,12 @@ public class TokenSigner implements Cloneable {
 
     public byte[] get_signature_bytes(byte[] value) {
         try {
+            byte[] message = derive_message(value);
             byte[] key = derive_key();
             SecretKeySpec signingKey = new SecretKeySpec(key, digestMethod.name);
             Mac mac = Mac.getInstance(digestMethod.name);
             mac.init(signingKey);
-            return mac.doFinal(value);
+            return mac.doFinal(message);
         } catch (Exception e) {
             return new byte[]{};
         }
@@ -244,7 +269,7 @@ public class TokenSigner implements Cloneable {
                 String.valueOf((char) sep),
                 digestMethod,
                 keyDerivation,
-                messageDigestAlgorithm);
+                messageDerivation, messageDigestAlgorithm);
     }
 
     @Override
@@ -253,6 +278,7 @@ public class TokenSigner implements Cloneable {
             TokenSigner clone = (TokenSigner) super.clone();
             clone.setDigestMethod(clone.getDigestMethod());
             clone.setKeyDerivation(clone.getKeyDerivation());
+            clone.setMessageDerivation(clone.getMessageDerivation());
             clone.setMessageDigestAlgorithm(clone.getMessageDigestAlgorythm());
             clone.setSep(clone.getSep());
             clone.setSecretKey(clone.getSecretKey());

@@ -529,6 +529,81 @@
                   </grid>
                 </children>
               </grid>
+              <grid id="9e45d" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <tabbedpane title-resource-bundle="strings" title-key="unknown_tab_lable"/>
+                </constraints>
+                <properties/>
+                <border type="empty"/>
+                <children>
+                  <grid id="77895" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="line" title-resource-bundle="strings" title-key="unknown_message_label">
+                      <color color="-7763575"/>
+                    </border>
+                    <children>
+                      <scrollpane id="241a5" class="org.fife.ui.rtextarea.RTextScrollPane">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties/>
+                        <border type="none"/>
+                        <children>
+                          <component id="849c2" class="org.fife.ui.rsyntaxtextarea.RSyntaxTextArea" binding="textAreaUnknownStringMessage" custom-create="true">
+                            <constraints/>
+                            <properties>
+                              <currentLineHighlightColor color="-1"/>
+                            </properties>
+                          </component>
+                        </children>
+                      </scrollpane>
+                    </children>
+                  </grid>
+                  <grid id="31275" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="line" title-resource-bundle="strings" title-key="unknown_signature_label">
+                      <color color="-7763575"/>
+                    </border>
+                    <children>
+                      <scrollpane id="62dfa" class="org.fife.ui.rtextarea.RTextScrollPane">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties/>
+                        <border type="none"/>
+                        <children>
+                          <component id="5d611" class="org.fife.ui.rsyntaxtextarea.RSyntaxTextArea" binding="textAreaUnknownStringSignature" custom-create="true">
+                            <constraints/>
+                            <properties>
+                              <currentLineHighlightColor color="-1"/>
+                            </properties>
+                          </component>
+                        </children>
+                      </scrollpane>
+                    </children>
+                  </grid>
+                  <grid id="e5624" binding="panelUnknownStringSeparator" custom-create="true" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="line" title-resource-bundle="strings" title-key="unknown_separator_label">
+                      <color color="-7763575"/>
+                    </border>
+                    <children/>
+                  </grid>
+                </children>
+              </grid>
             </children>
           </tabbedpane>
           <grid id="f207f" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

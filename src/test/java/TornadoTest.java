@@ -9,6 +9,7 @@ import one.d4d.sessionless.utils.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,8 +41,9 @@ public class TornadoTest {
                 optionalToken.get().setSigner(s);
                 final List<String> secrets = Utils.readResourceForClass("/secrets", this.getClass());
                 final List<String> salts = Utils.readResourceForClass("/salts", this.getClass());
+                final List<SecretKey> knownKeys = new ArrayList<>();
 
-                BruteForce bf = new BruteForce(secrets, salts, Attack.FAST, optionalToken.get());
+                BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.FAST, optionalToken.get());
                 SecretKey sk = bf.search();
                 Assertions.assertNotNull(sk);
             }

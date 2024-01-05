@@ -11,6 +11,7 @@ import one.d4d.sessionless.keys.SecretKey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,12 +21,13 @@ public class DjangoTest {
     void DjangoBruteForceTest() {
         List<String> signingSecrets = List.of("secret");
         List<String> signingSalts = List.of("django.contrib.sessions.backends.signed_cookies");
+        List<SecretKey> knownKeys = new ArrayList<>();
         Attack mode = Attack.Deep;
         String value = "gAWVMwAAAAAAAAB9lIwKdGVzdGNvb2tpZZSMBXBvc2l4lIwGc3lzdGVtlJOUjAhzbGVlcCAzMJSFlFKUcy4:1rBDnz:6RroyItcbm4P82lx2kEAuV2ykxs";
         Optional<SignedToken> optionalToken = SignedTokenObjectFinder.parseToken(value);
         if (optionalToken.isPresent()) {
             DangerousSignedToken token = (DangerousSignedToken) optionalToken.get();
-            BruteForce bf = new BruteForce(signingSecrets, signingSalts, mode, token);
+            BruteForce bf = new BruteForce(signingSecrets, signingSalts, knownKeys, mode, token);
             SecretKey k = bf.search();
             Assertions.assertNotNull(k);
         } else {

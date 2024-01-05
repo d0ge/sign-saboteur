@@ -3,6 +3,7 @@ package one.d4d.sessionless.forms;
 import burp.api.montoya.collaborator.CollaboratorPayloadGenerator;
 import burp.api.montoya.ui.Selection;
 import burp.api.montoya.ui.editor.extension.ExtensionProvidedEditor;
+import burp.config.SignerConfig;
 import one.d4d.sessionless.hexcodearea.HexCodeAreaFactory;
 import one.d4d.sessionless.presenter.EditorPresenter;
 import one.d4d.sessionless.presenter.PresenterStore;
@@ -32,12 +33,14 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public static final int TAB_EXPRESS = 1;
     public static final int TAB_OAUTH = 2;
     public static final int TAB_TORNADO = 3;
+    public static final int TAB_UNKNOWN = 4;
     private static final int MAX_JOSE_OBJECT_STRING_LENGTH = 68;
     final EditorPresenter presenter;
     private final RstaFactory rstaFactory;
     private final boolean editable;
     private final HexCodeAreaFactory hexCodeAreaFactory;
     private final boolean isProVersion;
+    private final SignerConfig signerConfig;
     private int mode;
     private JPanel mainPanel;
     private JTabbedPane tabbedPane;
@@ -65,10 +68,14 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     private JCheckBox checkBoxDjango;
     private JCheckBox checkBoxCompress;
     private JButton buttonAttack;
+    private RSyntaxTextArea textAreaUnknownStringMessage;
+    private JPanel panelUnknownStringSeparator;
+    private RSyntaxTextArea textAreaUnknownStringSignature;
     private CodeArea codeAreaDangerousSignature;
     private CodeArea codeAreaDangerousSeparator;
     private CodeArea codeAreaOAuthSignature;
     private CodeArea codeAreaTornadoSignature;
+    private CodeArea codeAreaUnknownSeparator;
 
     EditorTab(
             PresenterStore presenters,
@@ -76,17 +83,20 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
             HexCodeAreaFactory hexAreaCodeFactory,
             CollaboratorPayloadGenerator collaboratorPayloadGenerator,
             ErrorLoggingActionListenerFactory actionListenerFactory,
+            SignerConfig signerConfig,
             boolean editable,
             boolean isProVersion) {
         this.rstaFactory = rstaFactory;
         this.editable = editable;
         this.hexCodeAreaFactory = hexAreaCodeFactory;
         this.isProVersion = isProVersion;
+        this.signerConfig = signerConfig;
         this.presenter = new EditorPresenter(
                 this,
                 collaboratorPayloadGenerator,
                 actionListenerFactory,
-                presenters);
+                presenters,
+                signerConfig);
 
         DocumentListener documentListener = new DocumentListener() {
             @Override
@@ -116,6 +126,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         textAreaTornadoTimestamp.getDocument().addDocumentListener(documentListener);
         textAreaTornadoName.getDocument().addDocumentListener(documentListener);
         textAreaTornadoValue.getDocument().addDocumentListener(documentListener);
+        textAreaUnknownStringMessage.getDocument().addDocumentListener(documentListener);
+        textAreaUnknownStringSignature.getDocument().addDocumentListener(documentListener);
 
         checkBoxIsJSON.addActionListener(e -> presenter.componentChanged());
         checkBoxDjango.addActionListener(e -> presenter.componentChanged());
@@ -125,6 +137,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         codeAreaDangerousSeparator.addDataChangedListener(presenter::componentChanged);
         codeAreaOAuthSignature.addDataChangedListener(presenter::componentChanged);
         codeAreaTornadoSignature.addDataChangedListener(presenter::componentChanged);
+        codeAreaUnknownSeparator.addDataChangedListener(presenter::componentChanged);
 
         comboBoxSignedToken.addActionListener(e -> presenter.onSelectionChanged());
 
@@ -294,6 +307,27 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setDangerouseIsCompressed(boolean enabled) {
         checkBoxCompress.setSelected(enabled);
     }
+    public String getUnknownMessage() {
+        return textAreaUnknownStringMessage.getText();
+    }
+
+    public void setUnknownMessage(String text) {
+        textAreaUnknownStringMessage.setText(text);
+    }
+    public String getUnknownSignature() {
+        return textAreaUnknownStringSignature.getText();
+    }
+
+    public void setUnknownSignature(String signature) {
+        textAreaUnknownStringSignature.setText(signature);
+    }
+    public byte[] getUnknownSeparator() {
+        return Utils.getCodeAreaData(codeAreaUnknownSeparator);
+    }
+
+    public void setUnknownSeparator(byte[] separator) {
+        codeAreaUnknownSeparator.setData(new ByteArrayEditableData(separator));
+    }
 
     public void setSignedTokenObjects(List<String> signedTokenObjectStrings) {
         comboBoxSignedToken.setModel(new MaxLengthStringComboBoxModel(MAX_JOSE_OBJECT_STRING_LENGTH, signedTokenObjectStrings));
@@ -321,20 +355,26 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         codeAreaTornadoSignature = hexCodeAreaFactory.build();
         panelTornadoSignature.add(codeAreaTornadoSignature);
 
+        panelUnknownStringSeparator = new JPanel(new BorderLayout());
+        codeAreaUnknownSeparator = hexCodeAreaFactory.build();
+        panelUnknownStringSeparator.add(codeAreaUnknownSeparator);
+
         // Create the Attack popup menu
         JPopupMenu popupMenuAttack = new JPopupMenu();
+        JMenuItem menuItemAttackBruteForceKnownKeys = new JMenuItem(Utils.getResourceString("editor_view_button_attack_known_keys"));
         JMenuItem menuItemAttackBruteForce = new JMenuItem(Utils.getResourceString("editor_view_button_attack_fast"));
         JMenuItem menuItemAttackBruteForceBalanced = new JMenuItem(Utils.getResourceString("editor_view_button_attack_balanced"));
         JMenuItem menuItemAttackBruteForceDeep = new JMenuItem(Utils.getResourceString("editor_view_button_attack_deep"));
 
         // Attach the event handlers to the popup menu click events
-
+        menuItemAttackBruteForceKnownKeys.addActionListener(e -> presenter.onAttackKnownKeysClicked());
         menuItemAttackBruteForce.addActionListener(e -> presenter.onAttackFastClicked());
         menuItemAttackBruteForceBalanced.addActionListener(e -> presenter.onAttackBalancedClicked());
         menuItemAttackBruteForceDeep.addActionListener(e -> presenter.onAttackDeepClicked());
 
 
         // Add the buttons to the popup menu
+        popupMenuAttack.add(menuItemAttackBruteForceKnownKeys);
         popupMenuAttack.add(menuItemAttackBruteForce);
         popupMenuAttack.add(menuItemAttackBruteForceBalanced);
         popupMenuAttack.add(menuItemAttackBruteForceDeep);
@@ -358,6 +398,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         textAreaTornadoTimestamp = rstaFactory.buildDefaultTextArea();
         textAreaTornadoName = rstaFactory.buildDefaultTextArea();
         textAreaTornadoValue = rstaFactory.buildDefaultTextArea();
+        textAreaUnknownStringMessage = rstaFactory.buildDefaultTextArea();
+        textAreaUnknownStringSignature = rstaFactory.buildDefaultTextArea();
     }
 
     private void onBruteForceAttackClicked() {
@@ -437,7 +479,18 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         EditationAllowed editationAllowed = editable ? ALLOWED : READ_ONLY;
         codeAreaTornadoSignature.setEditationAllowed(editationAllowed);
     }
+    public void setUnknownMode() {
+        mode = TAB_UNKNOWN;
+        enableTabAtIndex(TAB_UNKNOWN);
+        buttonBruteForceAttack.setEnabled(editable);
+        buttonAttack.setEnabled(editable);
 
+        textAreaUnknownStringMessage.setEditable(editable);
+        textAreaUnknownStringSignature.setEditable(editable);
+
+        EditationAllowed editationAllowed = editable ? ALLOWED : READ_ONLY;
+        codeAreaUnknownSeparator.setEditationAllowed(editationAllowed);
+    }
 
     @Override
     public String caption() {

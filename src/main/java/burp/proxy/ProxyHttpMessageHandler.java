@@ -2,12 +2,14 @@ package burp.proxy;
 
 import burp.api.montoya.proxy.http.*;
 import burp.api.montoya.utilities.ByteUtils;
+import burp.config.ProxyConfig;
+import burp.config.SignerConfig;
 
 public class ProxyHttpMessageHandler implements ProxyRequestHandler, ProxyResponseHandler {
     private final AnnotationsModifier annotationsModifier;
 
-    public ProxyHttpMessageHandler(ProxyConfig proxyConfig, ByteUtils byteUtils) {
-        this.annotationsModifier = new AnnotationsModifier(proxyConfig, byteUtils);
+    public ProxyHttpMessageHandler(ProxyConfig proxyConfig, SignerConfig signerConfig, ByteUtils byteUtils) {
+        this.annotationsModifier = new AnnotationsModifier(proxyConfig, signerConfig, byteUtils);
     }
 
     @Override

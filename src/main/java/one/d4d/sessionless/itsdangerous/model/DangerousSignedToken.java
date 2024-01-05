@@ -28,6 +28,7 @@ public class DangerousSignedToken extends SignedToken {
             String signature,
             Algorithms algorithm,
             Derivation derivation,
+            MessageDerivation messageDerivation,
             MessageDigestAlgorithm digest) {
         super(String.format("%s%c%s", payload, separator, timestamp));
         this.separator = separator;
@@ -37,6 +38,7 @@ public class DangerousSignedToken extends SignedToken {
         this.signer = new DangerousTokenSigner(
                 algorithm,
                 derivation,
+                messageDerivation,
                 digest,
                 new byte[]{},
                 new byte[]{},

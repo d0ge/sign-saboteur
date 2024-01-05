@@ -13,7 +13,7 @@ public class ExpressTokenSigner extends TokenSigner {
     }
 
     public ExpressTokenSigner() {
-        super(Algorithms.SHA1, Derivation.NONE, MessageDigestAlgorithm.NONE, new byte[]{}, new byte[]{}, (byte) 0);
+        super(Algorithms.SHA1, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE, new byte[]{}, new byte[]{}, (byte) 0);
     }
 
     public ExpressTokenSigner(byte sep) {

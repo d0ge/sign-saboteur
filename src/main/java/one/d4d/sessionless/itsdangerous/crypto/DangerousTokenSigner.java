@@ -1,10 +1,7 @@
 package one.d4d.sessionless.itsdangerous.crypto;
 
 import com.google.common.primitives.Bytes;
-import one.d4d.sessionless.itsdangerous.Algorithms;
-import one.d4d.sessionless.itsdangerous.BadSignatureException;
-import one.d4d.sessionless.itsdangerous.Derivation;
-import one.d4d.sessionless.itsdangerous.MessageDigestAlgorithm;
+import one.d4d.sessionless.itsdangerous.*;
 import one.d4d.sessionless.keys.SecretKey;
 import one.d4d.sessionless.utils.Utils;
 
@@ -31,11 +28,12 @@ public class DangerousTokenSigner extends TokenSigner {
     public DangerousTokenSigner(
             Algorithms algorithm,
             Derivation keyDerivation,
+            MessageDerivation messageDerivation,
             MessageDigestAlgorithm digest,
             byte[] secret_key,
             byte[] salt,
             byte sep) {
-        super(algorithm, keyDerivation, digest, secret_key, salt, sep);
+        super(algorithm, keyDerivation, messageDerivation, digest, secret_key, salt, sep);
     }
 
     public DangerousTokenSigner(String digestMethod, String keyDerivation, byte[] secret_key, byte[] salt, byte sep) {

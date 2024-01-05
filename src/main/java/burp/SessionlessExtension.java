@@ -6,11 +6,7 @@ import burp.api.montoya.persistence.Preferences;
 import burp.api.montoya.proxy.Proxy;
 import burp.api.montoya.ui.UserInterface;
 import burp.api.montoya.utilities.ByteUtils;
-import burp.config.BurpConfig;
-import burp.config.BurpConfigPersistence;
-import burp.config.BurpKeysModelPersistence;
-import burp.config.KeysModel;
-import burp.proxy.ProxyConfig;
+import burp.config.*;
 import burp.proxy.ProxyHttpMessageHandler;
 import burp.proxy.ProxyWsMessageHandler;
 import one.d4d.sessionless.forms.ExtensionTab;
@@ -43,6 +39,11 @@ public class SessionlessExtension implements BurpExtension {
         UserInterface userInterface = api.userInterface();
         Window suiteWindow = userInterface.swingUtils().suiteFrame();
 
+        Proxy proxy = api.proxy();
+        ProxyConfig proxyConfig = burpConfig.proxyConfig();
+        SignerConfig signerConfig = burpConfig.signerConfig();
+        ByteUtils byteUtils = api.utilities().byteUtils();
+
         boolean isProVersion = api.burpSuite().version().edition() == PROFESSIONAL;
         RstaFactory rstaFactory = new RstaFactory(userInterface, api.logging());
 
@@ -64,6 +65,7 @@ public class SessionlessExtension implements BurpExtension {
                         api.logging(),
                         api.userInterface(),
                         api.collaborator().defaultPayloadGenerator(),
+                        signerConfig,
                         editorCreationContext.editorMode() != READ_ONLY,
                         isProVersion
                 )
@@ -76,20 +78,17 @@ public class SessionlessExtension implements BurpExtension {
                         api.logging(),
                         api.userInterface(),
                         api.collaborator().defaultPayloadGenerator(),
+                        signerConfig,
                         editorCreationContext.editorMode() != READ_ONLY,
                         isProVersion
                 )
         );
 
-        Proxy proxy = api.proxy();
-        ProxyConfig proxyConfig = burpConfig.proxyConfig();
-        ByteUtils byteUtils = api.utilities().byteUtils();
-
-        ProxyHttpMessageHandler proxyHttpMessageHandler = new ProxyHttpMessageHandler(proxyConfig, byteUtils);
+        ProxyHttpMessageHandler proxyHttpMessageHandler = new ProxyHttpMessageHandler(proxyConfig, signerConfig, byteUtils);
         proxy.registerRequestHandler(proxyHttpMessageHandler);
         proxy.registerResponseHandler(proxyHttpMessageHandler);
 
-        ProxyWsMessageHandler proxyWsMessageHandler = new ProxyWsMessageHandler(proxyConfig, byteUtils);
+        ProxyWsMessageHandler proxyWsMessageHandler = new ProxyWsMessageHandler(proxyConfig, signerConfig, byteUtils);
         proxy.registerWebSocketCreationHandler(proxyWebSocketCreation ->
                 proxyWebSocketCreation.proxyWebSocket().registerProxyMessageHandler(proxyWsMessageHandler)
         );

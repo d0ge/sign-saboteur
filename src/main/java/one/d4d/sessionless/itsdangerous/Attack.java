@@ -3,6 +3,8 @@ package one.d4d.sessionless.itsdangerous;
 import com.google.gson.annotations.SerializedName;
 
 public enum Attack {
+    @SerializedName("Known")
+    KNOWN("Known"),
     @SerializedName("Fast")
     FAST("Fast"),
     @SerializedName("Balanced")

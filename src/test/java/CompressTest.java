@@ -15,6 +15,5 @@ public class CompressTest {
         }catch (Exception e) {
             fail(e.getMessage());
         }
-
     }
 }

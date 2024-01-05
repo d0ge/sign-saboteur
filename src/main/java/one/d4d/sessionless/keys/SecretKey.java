@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import one.d4d.sessionless.itsdangerous.Algorithms;
 import one.d4d.sessionless.itsdangerous.Derivation;
+import one.d4d.sessionless.itsdangerous.MessageDerivation;
 import one.d4d.sessionless.itsdangerous.MessageDigestAlgorithm;
 
 public class SecretKey implements Key {
@@ -26,6 +27,9 @@ public class SecretKey implements Key {
     @SerializedName("keyDerivation")
     private final Derivation keyDerivation;
     @Expose
+    @SerializedName("messageDerivation")
+    private final MessageDerivation messageDerivation;
+    @Expose
     @SerializedName("messageDigestAlgorythm")
     private final MessageDigestAlgorithm messageDigestAlgorithm;
 
@@ -36,6 +40,7 @@ public class SecretKey implements Key {
             String separator,
             Algorithms digestMethod,
             Derivation keyDerivation,
+            MessageDerivation messageDerivation,
             MessageDigestAlgorithm messageDigestAlgorithm) {
         this.keyId = keyId;
         this.secret = secret;
@@ -43,6 +48,7 @@ public class SecretKey implements Key {
         this.separator = separator;
         this.digestMethod = digestMethod;
         this.keyDerivation = keyDerivation;
+        this.messageDerivation = messageDerivation;
         this.messageDigestAlgorithm = messageDigestAlgorithm;
     }
 
@@ -64,6 +70,10 @@ public class SecretKey implements Key {
 
     public Derivation getKeyDerivation() {
         return keyDerivation;
+    }
+
+    public MessageDerivation getMessageDerivation() {
+        return messageDerivation;
     }
 
     public MessageDigestAlgorithm getMessageDigestAlgorythm() {

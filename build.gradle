@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'one.d4d'
-version = '0.0.1'
+version = '0.0.2'
 description = 'token-signer'
 
 repositories {
@@ -37,7 +37,7 @@ dependencies {
             'com.nimbusds:nimbus-jose-jwt:9.21',
             'org.exbin.deltahex:deltahex-swing:0.1.2',
             'com.fifesoft:rsyntaxtextarea:3.3.3',
-            'org.json:json:20230227',
+            'org.json:json:20231013',
             'org.apache.commons:commons-lang3:3.12.0'
     )
     testImplementation(

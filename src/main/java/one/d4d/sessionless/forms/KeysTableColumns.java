@@ -6,9 +6,10 @@ import static java.util.Arrays.stream;
 
 enum KeysTableColumns {
     ID("table_id", 30, String.class),
-    SECRET("table_secret", 40, String.class),
+    SECRET("table_secret", 30, String.class),
     ALGORITHM("table_algorithm", 10, String.class),
     DERIVATION("table_derivation",10, String.class),
+    MESSAGE_DERIVATION("table_message_derivation", 10, String.class),
     DIGEST("table_digest",10, String.class);
 
     private final String label;

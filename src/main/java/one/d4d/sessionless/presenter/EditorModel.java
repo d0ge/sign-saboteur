@@ -2,6 +2,7 @@ package one.d4d.sessionless.presenter;
 
 import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
+import burp.config.SignerConfig;
 import one.d4d.sessionless.itsdangerous.model.MutableSignedToken;
 import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class EditorModel {
+    private final SignerConfig signerConfig;
     private static final String SERIALIZED_OBJECT_FORMAT_STRING = "%d - %s";
 
     private final List<MutableSignedToken> mutableSerializedObjects = new ArrayList<>();
@@ -18,11 +20,15 @@ class EditorModel {
 
     private String message;
 
+    public EditorModel(SignerConfig signerConfig) {
+        this.signerConfig = signerConfig;
+    }
+
     void setMessage(String content, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         synchronized (lock) {
             message = content;
             mutableSerializedObjects.clear();
-            mutableSerializedObjects.addAll(SignedTokenObjectFinder.extractSignedTokenObjects(content,cookies,params));
+            mutableSerializedObjects.addAll(SignedTokenObjectFinder.extractSignedTokenObjects(signerConfig,content,cookies,params));
         }
     }
 

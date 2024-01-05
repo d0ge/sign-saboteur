@@ -5,6 +5,8 @@ import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.api.montoya.utilities.ByteUtils;
+import burp.config.ProxyConfig;
+import burp.config.SignerConfig;
 import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
 
 import java.util.List;
@@ -12,10 +14,12 @@ import java.util.List;
 class AnnotationsModifier {
     private final ByteUtils byteUtils;
     private final ProxyConfig proxyConfig;
+    private final SignerConfig signerConfig;
 
-    AnnotationsModifier(ProxyConfig proxyConfig, ByteUtils byteUtils) {
+    AnnotationsModifier(ProxyConfig proxyConfig, SignerConfig signerConfig, ByteUtils byteUtils) {
         this.byteUtils = byteUtils;
         this.proxyConfig = proxyConfig;
+        this.signerConfig = signerConfig;
     }
 
     void updateAnnotationsIfApplicable(Annotations annotations, ByteArray data, List<Cookie> cookies, List<ParsedHttpParameter> params) {
@@ -37,7 +41,7 @@ class AnnotationsModifier {
     }
 
     private Counts countExtractedSignedTokenObjects(String messageString, List<Cookie> cookies, List<ParsedHttpParameter> params) {
-        int count = SignedTokenObjectFinder.extractSignedTokenObjects(messageString, cookies, params).size();
+        int count = SignedTokenObjectFinder.extractSignedTokenObjects(signerConfig, messageString, cookies, params).size();
 
         return new Counts(proxyConfig, count);
     }

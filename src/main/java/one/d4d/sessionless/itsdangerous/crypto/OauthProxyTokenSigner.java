@@ -1,9 +1,6 @@
 package one.d4d.sessionless.itsdangerous.crypto;
 
-import one.d4d.sessionless.itsdangerous.Algorithms;
-import one.d4d.sessionless.itsdangerous.Derivation;
-import one.d4d.sessionless.itsdangerous.DerivationException;
-import one.d4d.sessionless.itsdangerous.MessageDigestAlgorithm;
+import one.d4d.sessionless.itsdangerous.*;
 import one.d4d.sessionless.utils.Utils;
 import one.d4d.sessionless.keys.SecretKey;
 import javax.crypto.Mac;
@@ -15,10 +12,10 @@ public class OauthProxyTokenSigner extends TokenSigner{
         super(key);
     }
     public OauthProxyTokenSigner() {
-        super(Algorithms.SHA256, Derivation.NONE, MessageDigestAlgorithm.NONE, new byte[] {}, new byte[] {}, (byte)'|');
+        super(Algorithms.SHA256, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE, new byte[] {}, new byte[] {}, (byte)'|');
     }
     public OauthProxyTokenSigner(Algorithms digestMethod, byte[] secret_key, byte sep) {
-        super(digestMethod, Derivation.NONE, MessageDigestAlgorithm.NONE, secret_key, new byte[] {}, sep);
+        super(digestMethod, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE, secret_key, new byte[] {}, sep);
     }
     @Override
     public byte[] derive_key() throws DerivationException {

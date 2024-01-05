@@ -1,5 +1,6 @@
-package burp.proxy;
+package burp.config;
 
+import burp.proxy.HighlightColor;
 import com.google.gson.annotations.Expose;
 import one.d4d.sessionless.utils.Utils;
 

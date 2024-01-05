@@ -2,12 +2,14 @@ package burp.proxy;
 
 import burp.api.montoya.proxy.websocket.*;
 import burp.api.montoya.utilities.ByteUtils;
+import burp.config.ProxyConfig;
+import burp.config.SignerConfig;
 
 public class ProxyWsMessageHandler implements ProxyMessageHandler {
     private final AnnotationsModifier annotationsModifier;
 
-    public ProxyWsMessageHandler(ProxyConfig proxyConfig, ByteUtils byteUtils) {
-        this.annotationsModifier = new AnnotationsModifier(proxyConfig, byteUtils);
+    public ProxyWsMessageHandler(ProxyConfig proxyConfig, SignerConfig signerConfig, ByteUtils byteUtils) {
+        this.annotationsModifier = new AnnotationsModifier(proxyConfig, signerConfig, byteUtils);
     }
 
     @Override

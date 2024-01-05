@@ -7,6 +7,7 @@ import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.logging.Logging;
 import burp.api.montoya.ui.UserInterface;
 import burp.api.montoya.ui.editor.extension.ExtensionProvidedHttpResponseEditor;
+import burp.config.SignerConfig;
 import one.d4d.sessionless.hexcodearea.HexCodeAreaFactory;
 import one.d4d.sessionless.presenter.PresenterStore;
 import one.d4d.sessionless.rsta.RstaFactory;
@@ -24,6 +25,7 @@ public class ResponseEditorView extends EditorTab implements ExtensionProvidedHt
               Logging logging,
               UserInterface userInterface,
               CollaboratorPayloadGenerator collaboratorPayloadGenerator,
+              SignerConfig signerConfig,
               boolean editable,
               boolean isProVersion) {
         super(
@@ -32,6 +34,7 @@ public class ResponseEditorView extends EditorTab implements ExtensionProvidedHt
                 new HexCodeAreaFactory(logging, userInterface),
                 collaboratorPayloadGenerator,
                 new ErrorLoggingActionListenerFactory(logging),
+                signerConfig,
                 editable,
                 isProVersion
         );
