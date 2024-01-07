@@ -12,9 +12,6 @@ on:
     tags:
       - '*'
 
-permissions:
-  contents: read
-
 jobs:
   build:
 
@@ -45,4 +42,4 @@ jobs:
       with:
         name: ${{github.ref_name}}
         allowUpdates: true
-        artifacts: "./build/libs/*.jar"
+        artifacts: "build/libs/*.jar"
