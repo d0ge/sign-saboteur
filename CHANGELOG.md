@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.4] - 2024-01-07
+
+### Changed
+- Github actions
+
 ## [0.0.2] - 2024-01-05
 
 ### Added
