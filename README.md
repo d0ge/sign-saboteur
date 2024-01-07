@@ -9,7 +9,7 @@ It was inspired by Fraser Winterborn and Dolph Flynn JWT Token extension. The or
 ## Build Instructions
 * Ensure that Java JDK 17 or newer is installed
 * From root of project, run the command `./gradlew jar`
-* This should place the JAR file `token-library-0.0.1.jar` within the `build/libs` directory
+* This should place the JAR file `token-library-0.0.3.jar` within the `build/libs` directory
 * This can be loaded into Burp by navigating to the `Extensions` tab, `Installed` sub-tab, clicking `Add` and loading the JAR file
 * This BApp is using the newer Montoya API so it's best to use the latest version of Burp (try the earlier adopter channel if there are issues with the latest stable release)
 
