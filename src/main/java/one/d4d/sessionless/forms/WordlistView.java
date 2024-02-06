@@ -25,6 +25,7 @@ public class WordlistView {
     private final KeysTableModel keysTableModel;
     private final DefaultListModel<String> modelSecrets = new DefaultListModel<>();
     private final DefaultListModel<String> modelSalts = new DefaultListModel<>();
+    private final KeyPresenter presenter;
     private JPanel mainPanel;
     private JButton secretsLoadButton;
     private JButton secretsRemoveButton;
@@ -38,7 +39,8 @@ public class WordlistView {
     private JTable tableKeys;
     private JTextArea textAreaSalts;
     private JTextArea textAreaSecrets;
-    private final KeyPresenter presenter;
+    private JButton secretsAddButton;
+    private JButton saltsAddButton;
     private JMenuItem menuItemDelete;
     private JMenuItem menuItemCopy;
 
@@ -79,10 +81,12 @@ public class WordlistView {
                 modelSalts);
 
         secretsLoadButton.addActionListener(presenter::onButtonLoadSecretsClick);
+        secretsAddButton.addActionListener(presenter::onButtonAddSecretsClick);
         secretsRemoveButton.addActionListener(presenter::onButtonRemoveSecretsClick);
         secretsCleanButton.addActionListener(presenter::onButtonCleanSecretsClick);
 
         saltsLoadButton.addActionListener(presenter::onButtonLoadSaltsClick);
+        saltsAddButton.addActionListener(presenter::onButtonAddSaltsClick);
         saltsRemoveButton.addActionListener(presenter::onButtonRemoveSaltsClick);
         saltsCleanButton.addActionListener(presenter::onButtonCleanSaltsClick);
 
@@ -90,52 +94,6 @@ public class WordlistView {
 
         // Attach event handlers for button clicks
         newKeyButton.addActionListener(e -> presenter.onButtonNewSecretKeyClick());
-    }
-    /**
-     * Class for the right-click popup menu
-     */
-    private class JTablePopup extends PercentageBasedColumnWidthTable {
-        private Integer popupRow;
-
-        public JTablePopup() {
-            super(KeysTableColumns.columnWidthPercentages());
-        }
-
-        @Override
-        public JPopupMenu getComponentPopupMenu() {
-            // Get the row that has been right-clicked on
-            Point p = getMousePosition();
-
-            if (p == null || rowAtPoint(p) < 0) {
-                popupRow = null;
-                return null;
-            }
-
-            popupRow = rowAtPoint(p);
-
-            boolean copyEnabled = false;
-
-            // No selection, set the selection
-            if (tableKeys.getSelectedRowCount() == 0) {
-                tableKeys.changeSelection(popupRow, 0, false, false);
-            }
-            // Selection equals right-clicked row - this will trigger on right-click release
-            else if (tableKeys.getSelectedRowCount() == 1 && tableKeys.getSelectedRow() == popupRow) {
-                copyEnabled = keysModel.getKey(popupRow) != null;
-            }
-            // Selection doesn't equal right-clicked row, change the selection
-            else if (tableKeys.getSelectedRowCount() == 1 && tableKeys.getSelectedRow() != popupRow) {
-                tableKeys.changeSelection(popupRow, 0, false, false);
-            }
-
-            menuItemCopy.setEnabled(copyEnabled);
-
-            return super.getComponentPopupMenu();
-        }
-
-        public Integer getPopupRow() {
-            return popupRow;
-        }
     }
 
     public Component getUiComponent() {
@@ -218,6 +176,53 @@ public class WordlistView {
 
     public Window getParent() {
         return parent;
+    }
+
+    /**
+     * Class for the right-click popup menu
+     */
+    private class JTablePopup extends PercentageBasedColumnWidthTable {
+        private Integer popupRow;
+
+        public JTablePopup() {
+            super(KeysTableColumns.columnWidthPercentages());
+        }
+
+        @Override
+        public JPopupMenu getComponentPopupMenu() {
+            // Get the row that has been right-clicked on
+            Point p = getMousePosition();
+
+            if (p == null || rowAtPoint(p) < 0) {
+                popupRow = null;
+                return null;
+            }
+
+            popupRow = rowAtPoint(p);
+
+            boolean copyEnabled = false;
+
+            // No selection, set the selection
+            if (tableKeys.getSelectedRowCount() == 0) {
+                tableKeys.changeSelection(popupRow, 0, false, false);
+            }
+            // Selection equals right-clicked row - this will trigger on right-click release
+            else if (tableKeys.getSelectedRowCount() == 1 && tableKeys.getSelectedRow() == popupRow) {
+                copyEnabled = keysModel.getKey(popupRow) != null;
+            }
+            // Selection doesn't equal right-clicked row, change the selection
+            else if (tableKeys.getSelectedRowCount() == 1 && tableKeys.getSelectedRow() != popupRow) {
+                tableKeys.changeSelection(popupRow, 0, false, false);
+            }
+
+            menuItemCopy.setEnabled(copyEnabled);
+
+            return super.getComponentPopupMenu();
+        }
+
+        public Integer getPopupRow() {
+            return popupRow;
+        }
     }
 
 }

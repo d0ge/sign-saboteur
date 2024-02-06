@@ -1,10 +1,9 @@
-
 plugins {
     id 'java-library'
 }
 
 group = 'one.d4d'
-version = '0.0.4'
+version = '0.0.6'
 description = 'token-signer'
 
 repositories {
@@ -63,8 +62,17 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
+def integrationTest = tasks.register("integrationTest", Test) {
+    useJUnitPlatform {
+        includeTags "slow"
+    }
+    shouldRunAfter test
+}
+
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'slow'
+    }
 }
 
 jar {

@@ -9,41 +9,40 @@ import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class JSONWebSignatureTest {
     @Test
     void JSONWebSignatureParserTest() {
-        final List<String> secrets = List.of("your-256-bit-secret");
-        final List<String> salts = List.of("salt");
+        final Set<String> secrets = new HashSet<>(List.of("your-256-bit-secret"));
+        final Set<String> salts = new HashSet<>(List.of("salt"));
         final List<SecretKey> knownKeys = new ArrayList<>();
         String value = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
         Optional<SignedToken> optionalToken = SignedTokenObjectFinder.parseJSONWebSignature(value);
         if (optionalToken.isPresent()) {
             JSONWebSignature token = (JSONWebSignature) optionalToken.get();
             BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.FAST, token);
-            SecretKey sk = bf.search();
+            SecretKey sk = bf.parallel();
             Assertions.assertNotNull(sk);
         } else {
             Assertions.fail("Token not found.");
         }
     }
+
     @Test
     void JSONWebSignatureClaimsTest() {
         try {
-            final List<String> secrets = List.of("secret");
-            final List<String> salts = List.of("salt");
+            final Set<String> secrets = new HashSet<>(List.of("secret"));
+            final Set<String> salts = new HashSet<>(List.of("salt"));
             final List<SecretKey> knownKeys = new ArrayList<>();
             URL target = new URL("https://d4d.one/");
-            SecretKey key = new SecretKey("1", "secret", "",".", Algorithms.SHA256, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE);
+            SecretKey key = new SecretKey("1", "secret", "", ".", Algorithms.SHA256, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE);
             String value = ClaimsUtils.generateJSONWebToken(target, ClaimsUtils.DEFAULT_USERNAME, key);
             Optional<SignedToken> optionalToken = SignedTokenObjectFinder.parseJSONWebSignature(value);
             if (optionalToken.isPresent()) {
                 JSONWebSignature token = (JSONWebSignature) optionalToken.get();
                 BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.FAST, token);
-                SecretKey sk = bf.search();
+                SecretKey sk = bf.parallel();
                 Assertions.assertNotNull(sk);
             } else {
                 Assertions.fail("Token not found.");

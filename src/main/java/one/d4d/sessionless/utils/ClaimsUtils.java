@@ -161,7 +161,7 @@ public class ClaimsUtils {
                     .customParam("iat", currentTimeMillis)
                     .customParam("exp", expirationTimeMillis)
                     .build();
-            JSONWebSignature token = new JSONWebSignature(header.toBase64URL().toString(), payload.toBase64URL().toString(), "", (byte) '.');
+            JSONWebSignature token = new JSONWebSignature(header.toBase64URL().toString(), payload.toBase64URL().toString(), "", new byte[]{'.'});
             JSONWebSignatureTokenSigner signer = new JSONWebSignatureTokenSigner(key);
             token.setSigner(signer);
             token.resign();

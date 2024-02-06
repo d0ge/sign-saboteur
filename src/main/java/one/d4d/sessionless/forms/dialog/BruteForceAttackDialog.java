@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import java.util.Set;
 
 
 public class BruteForceAttackDialog extends AbstractDialog {
@@ -23,8 +24,8 @@ public class BruteForceAttackDialog extends AbstractDialog {
     public BruteForceAttackDialog(
             Window parent,
             ErrorLoggingActionListenerFactory actionListenerFactory,
-            List<String> signingSecrets,
-            List<String> signingSalts,
+            Set<String> signingSecrets,
+            Set<String> signingSalts,
             List<SecretKey> signingKeys,
             Attack mode,
             SignedToken token
@@ -34,12 +35,6 @@ public class BruteForceAttackDialog extends AbstractDialog {
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonCancel);
 
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -65,10 +60,12 @@ public class BruteForceAttackDialog extends AbstractDialog {
         );
         lblStatus.setText(lblText);
         SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>() {
+            private BruteForce bf;
+
             @Override
             protected Void doInBackground() throws Exception {
-                BruteForce bf = new BruteForce(signingSecrets, signingSalts, signingKeys, mode, token);
-                SecretKey k = bf.search();
+                bf = new BruteForce(signingSecrets, signingSalts, signingKeys, mode, token);
+                SecretKey k = bf.parallel();
                 if (k != null) {
                     secretKey = k;
                 }
@@ -77,10 +74,26 @@ public class BruteForceAttackDialog extends AbstractDialog {
 
             @Override
             protected void done() {
+                if (isCancelled()) {
+                    if (bf != null) bf.shutdown();
+                }
                 dispose();
             }
         };
         sw.execute();
+        buttonCancel.addActionListener(e -> {
+            sw.cancel(true);
+            onCancel();
+        });
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                sw.cancel(true);
+            }
+
+            public void windowClosed(WindowEvent e) {
+                sw.cancel(true);
+            }
+        });
     }
 
 
@@ -93,4 +106,5 @@ public class BruteForceAttackDialog extends AbstractDialog {
     public SecretKey getSecretKey() {
         return secretKey;
     }
+
 }

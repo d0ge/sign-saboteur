@@ -1,4 +1,3 @@
-import one.d4d.sessionless.itsdangerous.Algorithms;
 import one.d4d.sessionless.itsdangerous.crypto.OauthProxyTokenSigner;
 import one.d4d.sessionless.itsdangerous.model.OauthProxySignedToken;
 import one.d4d.sessionless.itsdangerous.model.SignedToken;
@@ -12,11 +11,12 @@ public class OAuth2Test {
     @Test
     void OauthProxyParserTest() {
         byte[] secret = "j76h5PEMx3FIGr3caArJ5g==".getBytes();
-        OauthProxyTokenSigner s = new OauthProxyTokenSigner(Algorithms.SHA256, secret, (byte) '|');
+        byte[] sep = new byte[]{(byte) '|'};
+        OauthProxyTokenSigner s = new OauthProxyTokenSigner(secret, sep);
         String key = "_oauth2_proxy_csrf";
         String value = "hVV2htpqQw4UXgsLYtKdAWct1VAg_yPMxjq2xrGaaCfZStG0p6sGjlAGim1a686QrbBgDGNnpr6LrKH88uTQpTMHLiknn-YbVnXsbFtRyciE5QJIk3q8t24=|1688047283|MFrbdc2q8uQSZd9bpfaWWAmfkHY3U4mijmQo-vqMRKw=";
         Optional<SignedToken> optionalSignedToken = SignedTokenObjectFinder.parseOauthProxySignedToken(key, value);
-        if (optionalSignedToken.isPresent()){
+        if (optionalSignedToken.isPresent()) {
             OauthProxySignedToken token = (OauthProxySignedToken) optionalSignedToken.get();
             token.setSigner(s);
             Assertions.assertDoesNotThrow(() -> {

@@ -6,21 +6,31 @@ import one.d4d.sessionless.keys.SecretKey;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
+import java.util.EnumSet;
 
 public class ExpressTokenSigner extends TokenSigner {
     public ExpressTokenSigner(SecretKey key) {
         super(key);
+        this.knownDerivations = EnumSet.of(Derivation.NONE);
     }
 
     public ExpressTokenSigner() {
-        super(Algorithms.SHA1, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE, new byte[]{}, new byte[]{}, (byte) 0);
+        this(Algorithms.SHA1, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE, new byte[]{}, new byte[]{}, new byte[]{});
     }
 
-    public ExpressTokenSigner(byte sep) {
-        super(new byte[]{}, sep);
+    public ExpressTokenSigner(
+            Algorithms digestMethod,
+            Derivation keyDerivation,
+            MessageDerivation messageDerivation,
+            MessageDigestAlgorithm digest,
+            byte[] secret_key,
+            byte[] salt,
+            byte[] sep) {
+        super(digestMethod, keyDerivation, messageDerivation, digest, secret_key, salt, sep);
+        this.knownDerivations = EnumSet.of(Derivation.NONE);
     }
 
-    public ExpressTokenSigner(byte[] secret_key, byte sep) {
+    public ExpressTokenSigner(byte[] secret_key, byte[] sep) {
         super(secret_key, sep);
     }
 

@@ -10,3 +10,7 @@
 "django.contrib.sessions.backends.signed_cookies"
 "flask-oidc-cookie"
 "flask-oidc-extra-data"
+"signed cookie"
+"encrypted cookie"
+"signed encrypted cookie"
+"a4fb52b0ccb302eaef92bda18fedf5c3"

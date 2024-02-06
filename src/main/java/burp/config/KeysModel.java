@@ -3,17 +3,15 @@ package burp.config;
 import com.google.gson.annotations.Expose;
 import one.d4d.sessionless.keys.SecretKey;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class KeysModel {
-    private final Object lock;
+    private final Object lockKeys = new Object();
     @Expose
     private final List<SecretKey> keys = new ArrayList<>();
-    private List<String> secrets = new ArrayList<>();
-    private List<String> salts = new ArrayList<>();
+    private Set<String> secrets = new HashSet<>();
+    private Set<String> salts = new HashSet<>();
     @Expose
     private String secretsFilePath;
     @Expose
@@ -22,23 +20,22 @@ public class KeysModel {
 
     public KeysModel() {
         this.modelListener = new KeysModelListener.InertKeyModelListener();
-        this.lock = new Object();
     }
 
-    public List<String> getSecrets() {
+    public Set<String> getSecrets() {
         return secrets;
     }
 
-    public void setSecrets(List<String> secrets) {
-        this.secrets = secrets;
+    public void setSecrets(Set<String> secrets) {
+        this.secrets.addAll(secrets);
     }
 
-    public List<String> getSalts() {
+    public Set<String> getSalts() {
         return salts;
     }
 
-    public void setSalts(List<String> salts) {
-        this.salts = salts;
+    public void setSalts(Set<String> salts) {
+        this.salts.addAll(salts);
     }
 
     public String getSecretsFilePath() {
@@ -69,29 +66,39 @@ public class KeysModel {
         secrets.remove(s);
     }
 
+    public void addSecret(String s) {
+        secrets.add(s);
+    }
+
     public void removeSalt(String s) {
         salts.remove(s);
     }
 
+    public void addSalt(String s) {
+        salts.add(s);
+    }
+
     public Optional<SecretKey> getKey(String keyId) {
-        return keys.stream().filter(x -> keyId.equals(x.getID())).findFirst();
+        synchronized (lockKeys) {
+            return keys.stream().filter(x -> keyId.equals(x.getID())).findFirst();
+        }
     }
 
     public SecretKey getKey(int index) {
-        synchronized (lock) {
+        synchronized (lockKeys) {
             return keys.get(index);
         }
     }
 
     public void addKey(SecretKey key) {
-        synchronized (lock) {
+        synchronized (lockKeys) {
             keys.add(key);
         }
         modelListener.notifyKeyInserted(key);
     }
 
     public List<SecretKey> getSigningKeys() {
-        synchronized (lock) {
+        synchronized (lockKeys) {
             return keys;
         }
     }
@@ -103,7 +110,7 @@ public class KeysModel {
     public void deleteKey(SecretKey keyId) {
         int rowIndex;
 
-        synchronized (lock) {
+        synchronized (lockKeys) {
             rowIndex = keys.indexOf(keyId);
             keys.remove(keyId);
         }
@@ -114,7 +121,7 @@ public class KeysModel {
     }
 
     public void deleteKeys(int[] indices) {
-        synchronized (lock) {
+        synchronized (lockKeys) {
             List<SecretKey> idsToDelete = IntStream.of(indices).mapToObj(this::getKey).toList();
 
             for (SecretKey id : idsToDelete) {

@@ -6,23 +6,22 @@ import one.d4d.sessionless.keys.SecretKey;
 import one.d4d.sessionless.utils.Utils;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 
 public class DangerousTokenSigner extends TokenSigner {
 
     public DangerousTokenSigner(SecretKey key) {
         super(key);
+        this.knownDerivations = EnumSet.of(Derivation.HMAC);
     }
 
-    public DangerousTokenSigner(byte sep) {
-        super(Algorithms.SHA1, Derivation.HMAC, new byte[]{}, new byte[]{}, sep);
+    public DangerousTokenSigner(byte[] sep) {
+        this(Algorithms.SHA1, Derivation.HMAC, MessageDerivation.NONE, MessageDigestAlgorithm.SHA256, new byte[]{}, new byte[]{}, sep);
     }
 
-    public DangerousTokenSigner(byte[] secret_key, byte sep) {
-        super(secret_key, sep);
-    }
-
-    public DangerousTokenSigner(Algorithms digestMethod, Derivation keyDerivation, byte[] secret_key, byte[] salt, byte sep) {
-        super(digestMethod, keyDerivation, secret_key, salt, sep);
+    public DangerousTokenSigner(byte[] secret_key, byte[] salt, byte[] sep) {
+        this(Algorithms.SHA1, Derivation.HMAC, MessageDerivation.NONE, MessageDigestAlgorithm.SHA256, secret_key, salt, sep);
     }
 
     public DangerousTokenSigner(
@@ -32,16 +31,14 @@ public class DangerousTokenSigner extends TokenSigner {
             MessageDigestAlgorithm digest,
             byte[] secret_key,
             byte[] salt,
-            byte sep) {
+            byte[] sep) {
         super(algorithm, keyDerivation, messageDerivation, digest, secret_key, salt, sep);
+        this.knownDerivations = EnumSet.of(Derivation.CONCAT, Derivation.DJANGO, Derivation.HMAC, Derivation.NONE);
     }
 
-    public DangerousTokenSigner(String digestMethod, String keyDerivation, byte[] secret_key, byte[] salt, byte sep) {
-        super(Algorithms.valueOf(digestMethod), Derivation.valueOf(keyDerivation), secret_key, salt, sep);
-    }
 
     public byte[] unsign(byte[] value) throws BadSignatureException {
-        int i = Bytes.lastIndexOf(value, sep);
+        int i = Collections.lastIndexOfSubList(Bytes.asList(value), Bytes.asList(sep));
         byte[] message = Arrays.copyOfRange(value, 0, i);
         byte[] signature = Arrays.copyOfRange(value, i + 1, value.length);
         return fast_unsign(message, signature);

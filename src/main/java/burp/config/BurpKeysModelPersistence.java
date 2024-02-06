@@ -6,7 +6,7 @@ import one.d4d.sessionless.utils.GsonHelper;
 import one.d4d.sessionless.utils.Utils;
 
 import java.io.File;
-import java.util.List;
+import java.util.Set;
 
 public class BurpKeysModelPersistence {
     static final String BURP_SETTINGS_NAME = "one.d4d.sessionless.keys";
@@ -29,7 +29,7 @@ public class BurpKeysModelPersistence {
         Gson gson = GsonHelper.customGson;
         KeysModel keysModel = gson.fromJson(json, KeysModel.class);
         if (keysModel.getSaltsFilePath() != null) {
-            List<String> result = Utils.deserializeFile(new File(keysModel.getSaltsFilePath()));
+            Set<String> result = Utils.deserializeFile(new File(keysModel.getSaltsFilePath()));
             if (result.isEmpty()) {
                 keysModel.setSalts(loadDefaultSalts());
             } else {
@@ -37,7 +37,7 @@ public class BurpKeysModelPersistence {
             }
         }
         if (keysModel.getSecretsFilePath() != null) {
-            List<String> result = Utils.deserializeFile(new File(keysModel.getSecretsFilePath()));
+            Set<String> result = Utils.deserializeFile(new File(keysModel.getSecretsFilePath()));
             if (result.isEmpty()) {
                 keysModel.setSecrets(loadDefaultSecrets());
             } else {
@@ -55,11 +55,11 @@ public class BurpKeysModelPersistence {
     }
 
 
-    private List<String> loadDefaultSecrets() {
+    private Set<String> loadDefaultSecrets() {
         return Utils.readResourceForClass("/secrets", this.getClass());
     }
 
-    private List<String> loadDefaultSalts() {
+    private Set<String> loadDefaultSalts() {
         return Utils.readResourceForClass("/salts", this.getClass());
     }
 

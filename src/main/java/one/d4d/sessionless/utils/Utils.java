@@ -20,13 +20,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class Utils {
+    public static final int BRUTE_FORCE_CHUNK_SIZE = 4096;
     public static final int WORDLIST_ONE_CHAR = 256;
     public static final int WORDLIST_TWO_CHAR = 65536;
     public static final int WORDLIST_THREE_CHAR = 16_777_216;
@@ -89,6 +89,30 @@ public class Utils {
 
         for (int i = 0; i < data.length; i++) {
             if (data[i] == sep) {
+                offsets.add(i);
+            }
+        }
+
+        offsets.add(data.length);
+
+        byte[][] ret = new byte[offsets.size()][];
+
+        int index = 0;
+        for (int i = 0; i < offsets.size(); i++) {
+            ret[i] = new byte[offsets.get(i) - index];
+            System.arraycopy(data, index, ret[i], 0, ret[i].length);
+            index = offsets.get(i) + 1;
+        }
+
+        return ret;
+    }
+
+    public static byte[][] split(byte[] data, byte[] sep) {
+        ArrayList<Integer> offsets = new ArrayList<>();
+
+        for (int i = 0; i < (data.length - sep.length); i++) {
+            byte[] candidate = Arrays.copyOfRange(data, i, i + sep.length);
+            if (Arrays.equals(candidate, sep)) {
                 offsets.add(i);
             }
         }
@@ -209,6 +233,7 @@ public class Utils {
         }
         return true;
     }
+
     public static boolean isValidJSON(byte[] json) {
         try {
             JsonParser.parseString(new String(json));
@@ -324,14 +349,14 @@ public class Utils {
         return ResourceBundle.getBundle(RESOURCE_BUNDLE).getString(id);
     }
 
-    public static List<String> readResourceForClass(final String fileName, Class clazz) {
-        List<String> result = new ArrayList<>();
+    public static Set<String> readResourceForClass(final String fileName, Class clazz) {
+        Set<String> result = new HashSet<>();
         try (InputStream inputStream = clazz.getResourceAsStream(fileName);
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             Gson gson = new Gson();
             reader.lines().forEach(x -> result.add(gson.fromJson(x, String.class)));
         } catch (Exception e) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
         return result;
     }
@@ -364,8 +389,8 @@ public class Utils {
         return data;
     }
 
-    public static List<String> deserializeFile(File f) {
-        List<String> result = new ArrayList<>();
+    public static Set<String> deserializeFile(File f) {
+        Set<String> result = new HashSet<>();
         Gson gson = new Gson();
         try (Stream<String> lines = Files.lines(f.toPath())) {
             lines.forEach(s -> {
@@ -378,12 +403,10 @@ public class Utils {
         } catch (IOException ex) {
             return result;
         }
-        return result.stream()
-                .distinct()
-                .collect(Collectors.toList());
+        return result;
     }
 
-    public static List<String> generateWordlist(long l) {
+    public static Set<String> generateWordlist(long l) {
         List<String> list = new ArrayList<>();
         for (; l < WORDLIST_ONE_CHAR; l++) {
             byte[] secret_key = new byte[]{(byte) l};
@@ -402,7 +425,7 @@ public class Utils {
                     (byte) l};
             list.add(new String(secret_key));
         }
-        return list;
+        return new HashSet<>(list);
     }
 }
 

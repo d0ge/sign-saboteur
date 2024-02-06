@@ -12,7 +12,7 @@ public class CompressTest {
             byte[] decArray = Utils.base64Decompress(expectedValue.getBytes());
             String realValue = Utils.compressBase64(decArray);
             assertArrayEquals(expectedValue.toCharArray(), realValue.toCharArray());
-        }catch (Exception e) {
+        } catch (Exception e) {
             fail(e.getMessage());
         }
     }

@@ -3,6 +3,7 @@ package one.d4d.sessionless.itsdangerous.model;
 import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.config.SignerConfig;
+import burp.config.Signers;
 import com.google.common.base.CharMatcher;
 import one.d4d.sessionless.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +23,7 @@ public class SignedTokenObjectFinder {
     private static final String SEPARATOR_REGEX = "[.:!#$*;@|~]";
     private static final String SIGNER_REGEX = String.format("\\.?%s*%s+%s*%s+%s+", BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX);
     private static final Pattern SIGNER_OBJECT_PATTERN = Pattern.compile(String.format("(%s)", SIGNER_REGEX));
-    private static final String UNKNOWN_SIGNED_STRING_REGEXP = String.format("(%s*%s%s{26,86})",BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX);
+    private static final String UNKNOWN_SIGNED_STRING_REGEXP = String.format("(%s*%s%s{26,86})", BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX);
     private static final Pattern UNKNOWN_SIGNED_STRING_PATTERN = Pattern.compile(UNKNOWN_SIGNED_STRING_REGEXP);
 
     public static boolean containsSignedTokenObjects(SignerConfig signerConfig, String text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
@@ -32,9 +33,9 @@ public class SignedTokenObjectFinder {
 
     public static List<MutableSignedToken> extractSignedTokenObjects(SignerConfig signerConfig, String text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         List<MutableSignedToken> signedTokensObjects = new ArrayList<>();
-        Map<String,String> cookiesToHashMap = convertCookiesToHashMap(cookies);
-        Map<String,String> paramsToHashMap = convertParamsToHashMap(params);
-        if (signerConfig.isEnableDangerous()) {
+        Map<String, String> cookiesToHashMap = convertCookiesToHashMap(cookies);
+        Map<String, String> paramsToHashMap = convertParamsToHashMap(params);
+        if (signerConfig.isEnabled(Signers.DANGEROUS)) {
             Set<String> tokenCandidates = findCandidateSignedTokenObjectsWithin(text);
             for (String candidate : tokenCandidates) {
                 parseToken(candidate)
@@ -42,27 +43,35 @@ public class SignedTokenObjectFinder {
                                 signedTokensObjects.add(new MutableSignedToken(candidate, value)));
             }
         }
-        if (signerConfig.isEnableExpress()) {
+        if (signerConfig.isEnabled(Signers.EXPRESS)) {
             signedTokensObjects.addAll(parseExpressSignedParams(cookiesToHashMap));
             signedTokensObjects.addAll(parseExpressSignedParams(paramsToHashMap));
         }
-        if(signerConfig.isEnableOAuth()) {
-            cookiesToHashMap.forEach((name,value) -> {
+        if (signerConfig.isEnabled(Signers.OAUTH)) {
+            cookiesToHashMap.forEach((name, value) -> {
                 parseOauthProxySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
             });
-            paramsToHashMap.forEach((name,value) -> {
+            paramsToHashMap.forEach((name, value) -> {
                 parseOauthProxySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
             });
         }
-        if(signerConfig.isEnableTornado()) {
-            cookiesToHashMap.forEach((name,value) -> {
+        if (signerConfig.isEnabled(Signers.TORNADO)) {
+            cookiesToHashMap.forEach((name, value) -> {
                 parseTornadoSignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
             });
-            paramsToHashMap.forEach((name,value) -> {
+            paramsToHashMap.forEach((name, value) -> {
                 parseTornadoSignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
             });
         }
-        if(signerConfig.isEnableUnknown()) {
+        if (signerConfig.isEnabled(Signers.RUBY)) {
+            cookiesToHashMap.forEach((name, value) -> {
+                parseRubySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
+            });
+            paramsToHashMap.forEach((name, value) -> {
+                parseRubySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
+            });
+        }
+        if (signerConfig.isEnabled(Signers.UNKNOWN)) {
             Set<String> stringCandidates = findCandidateUnknownSignedStringWithin(text);
             for (String candidate : stringCandidates) {
                 parseUnknownSignedString(candidate)
@@ -97,6 +106,7 @@ public class SignedTokenObjectFinder {
 
         return strings;
     }
+
     public static Optional<SignedToken> parseToken(String candidate) {
         Optional<SignedToken> dst = parseDjangoSignedToken(candidate);
         return dst.isPresent() ? dst : parseDangerousSignedToken(candidate);
@@ -110,7 +120,7 @@ public class SignedTokenObjectFinder {
         return parseSignedTokenWithinCookies(params);
     }
 
-    private static Map<String,String> convertParamsToHashMap(List<ParsedHttpParameter> params) {
+    private static Map<String, String> convertParamsToHashMap(List<ParsedHttpParameter> params) {
         if (params == null) return new HashMap<>();
         return params.stream()
                 .collect(Collectors.toMap(
@@ -118,7 +128,8 @@ public class SignedTokenObjectFinder {
                         ParsedHttpParameter::value)
                 );
     }
-    private static Map<String,String> convertCookiesToHashMap(List<Cookie> cookies) {
+
+    private static Map<String, String> convertCookiesToHashMap(List<Cookie> cookies) {
         if (cookies == null) return new HashMap<>();
         return cookies.stream()
                 .collect(Collectors.toMap(
@@ -126,7 +137,8 @@ public class SignedTokenObjectFinder {
                         Cookie::value)
                 );
     }
-    public static List<MutableSignedToken> parseExpressSignedParams(Map<String,String> params) {
+
+    public static List<MutableSignedToken> parseExpressSignedParams(Map<String, String> params) {
         List<MutableSignedToken> signedTokensObjects = new ArrayList<>();
         if (params != null) {
             List<String> signatures = params
@@ -137,7 +149,7 @@ public class SignedTokenObjectFinder {
             for (String signature : signatures) {
                 String sigValue = params.get(signature);
                 String signedParameter = signature.substring(0, signature.toUpperCase().indexOf(SIGNED_PARAM));
-                if(params.get(signedParameter) == null) continue;
+                if (params.get(signedParameter) == null) continue;
                 String signedValue = params.get(signedParameter);
                 try {
                     Base64.getUrlDecoder().decode(signedValue);
@@ -152,7 +164,8 @@ public class SignedTokenObjectFinder {
 
         return signedTokensObjects;
     }
-    public static List<MutableSignedToken> parseSignedTokenWithinHashMap(Map<String,String> params) {
+
+    public static List<MutableSignedToken> parseSignedTokenWithinHashMap(Map<String, String> params) {
         List<MutableSignedToken> signedTokensObjects = new ArrayList<>();
         if (params != null) {
             List<String> signatures = params.keySet().stream().filter(value -> value.toUpperCase().contains(SIGNED_PARAM))
@@ -160,7 +173,7 @@ public class SignedTokenObjectFinder {
             for (String signature : signatures) {
                 String sigValue = params.get(signature);
                 String signedParameter = signature.substring(0, signature.toUpperCase().indexOf(SIGNED_PARAM));
-                if(params.get(signedParameter) == null) continue;
+                if (params.get(signedParameter) == null) continue;
                 String signedValue = params.get(signedParameter);
                 try {
                     Base64.getUrlDecoder().decode(signedValue);
@@ -171,7 +184,7 @@ public class SignedTokenObjectFinder {
                 signedTokensObjects.add(new MutableSignedToken(signedValue, t));
 
             }
-            params.forEach((name,value) -> {
+            params.forEach((name, value) -> {
                 Optional<SignedToken> candidate = parseOauthProxySignedToken(name, value);
                 candidate = candidate.isPresent() ? candidate : parseTornadoSignedToken(name, value);
                 candidate.ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
@@ -180,6 +193,7 @@ public class SignedTokenObjectFinder {
 
         return signedTokensObjects;
     }
+
     public static List<MutableSignedToken> parseSignedTokenWithinParams(List<ParsedHttpParameter> params) {
         List<MutableSignedToken> signedTokensObjects = new ArrayList<>();
         if (params != null) {
@@ -284,6 +298,7 @@ public class SignedTokenObjectFinder {
     private static String unquoteCookie(String cookie) {
         return cookie.replaceAll("^\"|\"$", "");
     }
+
     public static Optional<SignedToken> parseTornadoSignedToken(String key, String value) {
         char sep = '|';
         String[] parts = StringUtils.split(unquoteCookie(value), sep);
@@ -353,12 +368,12 @@ public class SignedTokenObjectFinder {
         String signature = parts[2];
         try {
             int length = Utils.normalization(signature.getBytes()).length;
-            if(Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
 
-        DangerousSignedToken t = new DangerousSignedToken((byte) separator, header, timestamp, signature);
+        DangerousSignedToken t = new DangerousSignedToken(new byte[]{(byte) separator}, header, timestamp, signature);
         return Optional.of(t);
     }
 
@@ -392,18 +407,19 @@ public class SignedTokenObjectFinder {
         String signature = parts[2];
         try {
             int length = Utils.normalization(signature.getBytes()).length;
-            if(Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
 
         DjangoSignedToken t = new DjangoSignedToken(
-                (byte) separator,
+                new byte[]{(byte) separator},
                 header,
                 timestamp,
                 signature);
         return Optional.of(t);
     }
+
     public static Optional<SignedToken> parseJSONWebSignature(String text) {
         char separator = '.';
         boolean compressed = false;
@@ -419,14 +435,14 @@ public class SignedTokenObjectFinder {
         // Header parser
         String header = compressed ? String.format(".%s", parts[0]) : parts[0];
         try {
-            if(!Utils.isValidJSON(Utils.base64Decompress(header.getBytes()))) return Optional.empty();
+            if (!Utils.isValidJSON(Utils.base64Decompress(header.getBytes()))) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
         // Body parser
         String body = parts[1];
         try {
-            if(!Utils.isValidJSON(Utils.base64Decompress(body.getBytes()))) return Optional.empty();
+            if (!Utils.isValidJSON(Utils.base64Decompress(body.getBytes()))) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -434,11 +450,11 @@ public class SignedTokenObjectFinder {
         String signature = parts[2];
         try {
             int length = Utils.base64Decompress(signature.getBytes()).length;
-            if(Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
-        SignedToken t = new JSONWebSignature(header, body, signature, (byte) separator);
+        SignedToken t = new JSONWebSignature(header, body, signature, new byte[]{(byte) separator});
 
         return Optional.of(t);
     }
@@ -452,16 +468,36 @@ public class SignedTokenObjectFinder {
         }
         if (separator == 0) return Optional.empty();
         int index = text.lastIndexOf(separator);
-        String message = text.substring(0,index);
+        String message = text.substring(0, index);
         String signature = text.substring(index + 1);
         try {
             int length = Utils.normalization(signature.getBytes()).length;
-            if(Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
 
-        UnknownSignedToken t = new UnknownSignedToken(message, signature, (byte) separator);
+        UnknownSignedToken t = new UnknownSignedToken(message, signature, new byte[]{(byte) separator});
         return Optional.of(t);
+    }
+
+    public static Optional<SignedToken> parseRubySignedToken(String key, String value) {
+        String sep = "--";
+        String[] parts = StringUtils.split(value, sep);
+        if (parts.length == 2) {
+            String payload = parts[0];
+            String signature = parts[1];
+            try {
+                Base64.getUrlDecoder().decode(payload);
+                int length = Utils.normalization(signature.getBytes()).length;
+                if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+            RubySignedToken t = new RubySignedToken(payload, signature);
+            return Optional.of(t);
+        }
+
+        return Optional.empty();
     }
 }

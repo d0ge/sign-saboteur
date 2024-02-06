@@ -60,6 +60,8 @@ public class SignDialog extends AbstractDialog {
                 s = new OauthProxyTokenSigner(selectedKey);
             } else if (tokenObject instanceof TornadoSignedToken) {
                 s = new TornadoTokenSigner(selectedKey);
+            } else if (tokenObject instanceof RubySignedToken) {
+                s = new RubyTokenSigner(selectedKey);
             } else if (tokenObject instanceof UnknownSignedToken) {
                 s = new TokenSigner(selectedKey);
             } else {

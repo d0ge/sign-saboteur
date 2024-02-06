@@ -2,63 +2,36 @@ package burp.config;
 
 import com.google.gson.annotations.Expose;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 public class SignerConfig {
+
     @Expose
-    private boolean enableDangerous;
-    @Expose
-    private boolean enableExpress;
-    @Expose
-    private boolean enableOAuth;
-    @Expose
-    private boolean enableTornado;
-    @Expose
-    private boolean enableUnknown;
+    private Set<Signers> enabled;
 
     public SignerConfig() {
-        this.enableDangerous = true;
-        this.enableExpress = true;
-        this.enableOAuth = false;
-        this.enableTornado = true;
-        this.enableUnknown = false;
+        EnumSet<Signers> disabled = EnumSet.of(Signers.OAUTH, Signers.UNKNOWN);
+        this.enabled = EnumSet.complementOf(disabled);
     }
 
-    public boolean isEnableDangerous() {
-        return enableDangerous;
+    public boolean isEnabled(Signers s) {
+        return this.enabled.contains(s);
     }
 
-    public void setEnableDangerous(boolean enableDangerous) {
-        this.enableDangerous = enableDangerous;
+    public void setEnabled(Signers s) {
+        this.enabled.add(s);
     }
 
-    public boolean isEnableExpress() {
-        return enableExpress;
+    public void removeEnabled(Signers s) {
+        this.enabled.remove(s);
     }
 
-    public void setEnableExpress(boolean enableExpress) {
-        this.enableExpress = enableExpress;
-    }
-
-    public boolean isEnableOAuth() {
-        return enableOAuth;
-    }
-
-    public void setEnableOAuth(boolean enableOAuth) {
-        this.enableOAuth = enableOAuth;
-    }
-
-    public boolean isEnableTornado() {
-        return enableTornado;
-    }
-
-    public void setEnableTornado(boolean enableTornado) {
-        this.enableTornado = enableTornado;
-    }
-
-    public boolean isEnableUnknown() {
-        return enableUnknown;
-    }
-
-    public void setEnableUnknown(boolean enableUnknown) {
-        this.enableUnknown = enableUnknown;
+    public void toggleEnabled(Signers s, boolean isEnabled) {
+        if (isEnabled) {
+            this.setEnabled(s);
+        } else {
+            this.removeEnabled(s);
+        }
     }
 }

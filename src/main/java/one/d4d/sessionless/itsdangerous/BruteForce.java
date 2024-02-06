@@ -1,21 +1,31 @@
 package one.d4d.sessionless.itsdangerous;
 
+import com.google.common.collect.Lists;
 import one.d4d.sessionless.itsdangerous.crypto.TokenSigner;
 import one.d4d.sessionless.itsdangerous.model.SignedToken;
 import one.d4d.sessionless.itsdangerous.model.UnknownSignedToken;
 import one.d4d.sessionless.keys.SecretKey;
+import one.d4d.sessionless.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.*;
 
 public class BruteForce {
-    private final List<String> secrets;
-    private final List<String> salts;
+    private final Set<String> secrets;
+    private final Set<String> salts;
     private final List<SecretKey> signingKeys;
     private final Attack scanConfiguration;
     private final SignedToken token;
+    private ExecutorService executor;
 
-    public BruteForce(List<String> secrets, List<String> salts, List<SecretKey> signingKeys, Attack scanConfiguration, SignedToken token) {
+    public BruteForce(Set<String> secrets,
+                      Set<String> salts,
+                      List<SecretKey> signingKeys,
+                      Attack scanConfiguration,
+                      SignedToken token) {
         this.secrets = secrets;
         this.salts = salts;
         this.signingKeys = signingKeys;
@@ -23,72 +33,52 @@ public class BruteForce {
         this.token = token;
     }
 
-    public List<TokenSigner> prepare() {
+    public List<TokenSigner> prepareAdvanced() {
         List<TokenSigner> attacks = new ArrayList<>();
+
+        List<Derivation> derivations = new ArrayList<>(List.of(Derivation.values()));
+
+        Set<MessageDerivation> messages = new HashSet<>(List.of(MessageDerivation.NONE));
+
+        List<MessageDigestAlgorithm> digests = new ArrayList<>(List.of(MessageDigestAlgorithm.values()));
+
         TokenSigner is = token.getSigner();
-        if (scanConfiguration == Attack.KNOWN) {
-            this.signingKeys.forEach(key -> {
-                TokenSigner ks = new TokenSigner(key);
-                attacks.add(ks);
-            });
+        this.signingKeys.forEach(key -> {
+            TokenSigner ks = new TokenSigner(key);
+            attacks.add(ks);
+        });
+
+        if (scanConfiguration == Attack.KNOWN) return attacks;
+
+        if (scanConfiguration == Attack.FAST) {
+            secrets.forEach(secret ->
+                    is.getKnownDerivations().forEach(d -> attacks.addAll(is.cloneWithSaltDerivation(secret, salts, d)))
+            );
             return attacks;
         }
-        for (String secret : secrets) {
-            if (scanConfiguration == Attack.FAST) {
-                if (is.getKeyDerivation() == Derivation.NONE) {
-                    TokenSigner s = is.clone();
-                    s.setSecretKey(secret.getBytes());
-                    attacks.add(s);
-                } else {
-                    for (String salt : salts) {
-                        TokenSigner s = is.clone();
-                        s.setSecretKey(secret.getBytes());
-                        s.setSalt(salt.getBytes());
-                        attacks.add(s);
+
+        if (token instanceof UnknownSignedToken) messages.addAll(List.of(MessageDerivation.values()));
+
+        if (scanConfiguration == Attack.Balanced) derivations.removeIf(
+                d -> d == Derivation.PBKDF2HMAC || d == Derivation.RUBY5 || d == Derivation.RUBY5_TRUNCATED);
+
+        secrets.forEach(secret -> {
+            messages.forEach(md -> {
+                derivations.forEach(d -> {
+                    if (d == Derivation.CONCAT || d == Derivation.DJANGO || d == Derivation.HASH) {
+                        digests.forEach(mda -> {
+                            attacks.addAll(is.cloneWithSaltDerivation(secret, salts, d, md, mda));
+                        });
+                    } else {
+                        attacks.addAll(is.cloneWithSaltDerivation(secret, salts, d, md));
                     }
-                }
-            } else {
-                for (MessageDerivation md : MessageDerivation.values()) {
-                    if(md != MessageDerivation.NONE && !(token instanceof UnknownSignedToken)) continue;
-                    for (Derivation d : Derivation.values()) {
-                        if (d == Derivation.NONE) {
-                            TokenSigner s = is.clone();
-                            s.setKeyDerivation(d);
-                            s.setMessageDerivation(md);
-                            s.setSecretKey(secret.getBytes());
-                            attacks.add(s);
-                        } else if (d == Derivation.HASH) {
-                            for (MessageDigestAlgorithm m : MessageDigestAlgorithm.values()) {
-                                TokenSigner s = is.clone();
-                                s.setKeyDerivation(d);
-                                s.setMessageDerivation(md);
-                                s.setSecretKey(secret.getBytes());
-                                s.setMessageDigestAlgorithm(m);
-                                attacks.add(s);
-                            }
-                        } else {
-                            if (d == Derivation.PBKDF2HMAC && scanConfiguration != Attack.Deep) continue;
-                            for (MessageDigestAlgorithm m : MessageDigestAlgorithm.values()) {
-                                for (String salt : salts) {
-                                    TokenSigner s = is.clone();
-                                    s.setKeyDerivation(d);
-                                    s.setMessageDerivation(md);
-                                    s.setSecretKey(secret.getBytes());
-                                    s.setSalt(salt.getBytes());
-                                    s.setMessageDigestAlgorithm(m);
-                                    attacks.add(s);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+                });
+            });
+        });
         return attacks;
     }
 
-    public SecretKey search() {
-        List<TokenSigner> attacks = prepare();
+    public SecretKey search(List<TokenSigner> attacks) {
         byte[] message = token.getEncodedMessage().getBytes();
         byte[] signature = token.getEncodedSignature().getBytes();
         for (TokenSigner s : attacks) {
@@ -101,4 +91,48 @@ public class BruteForce {
         return null;
     }
 
+    public SecretKey parallel() {
+        int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
+        List<TokenSigner> attacks = prepareAdvanced();
+        if (NUMBER_OF_CORES < 2) {
+            return search(attacks);
+        }
+        this.executor = Executors.newFixedThreadPool(NUMBER_OF_CORES);
+        byte[] message = token.getEncodedMessage().getBytes();
+        byte[] signature = token.getEncodedSignature().getBytes();
+        List<Callable<SecretKey>> tasks = new ArrayList<>();
+        Lists.partition(attacks, Utils.BRUTE_FORCE_CHUNK_SIZE)
+                .forEach(partition -> {
+                    tasks.add(() -> {
+                        for (TokenSigner s : partition) {
+                            try {
+                                s.fast_unsign(message, signature);
+                                return s.getKey();
+                            } catch (BadSignatureException ignored) {
+                            }
+                        }
+                        throw new RuntimeException("Key not found");
+                    });
+                });
+        try {
+            return executor.invokeAny(tasks);
+        } catch (InterruptedException | ExecutionException ignored) {
+            return null;
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    public void shutdown() {
+        if (this.executor != null) {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException ignored) {
+
+            }
+        }
+    }
 }

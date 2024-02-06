@@ -8,15 +8,14 @@ import one.d4d.sessionless.utils.Utils;
 import java.util.Base64;
 
 public class OauthProxySignedToken extends SignedToken {
-
-    public static byte separator = '|';
+    public static byte[] separator = {'|'};
     public String parameter;
     public String payload;
     public String timestamp;
 
 
     public OauthProxySignedToken(String parameter, String payload, String timestamp, String signature) {
-        super(String.format("%s%c%s%c%s", parameter, separator, payload, separator, timestamp));
+        super(String.format("%s%s%s%s%s", parameter, new String(separator), payload, new String(separator), timestamp));
         this.payload = payload;
         this.timestamp = timestamp;
         this.signature = signature;
@@ -36,12 +35,29 @@ public class OauthProxySignedToken extends SignedToken {
         return Utils.timestampSeconds(timestamp);
     }
 
-    public byte[] getSignature() {
-        return Base64.getUrlDecoder().decode(signature);
-    }
-
     public void setSigner(OauthProxyTokenSigner signer) {
         this.signer = signer;
+    }
+
+    public byte[] dumps(String payload) {
+        try {
+            return signer.sign(payload.getBytes());
+        } catch (Exception e) {
+            return new byte[]{};
+        }
+    }
+
+    public void unsign() throws BadSignatureException {
+        signer.fast_unsign(this.message.getBytes(), this.signature.getBytes());
+    }
+
+    public byte[] getSeparator() {
+        return separator;
+    }
+
+    @Override
+    public String serialize() {
+        return String.format("%s%s%s%s%s", payload, new String(separator), timestamp, new String(separator), signature);
     }
 
     @Override
@@ -53,30 +69,11 @@ public class OauthProxySignedToken extends SignedToken {
     @Override
     public void setClaims(JWTClaimsSet claims) {
         this.payload = new String(Base64.getUrlEncoder().encode(claims.toString().getBytes()));
-        this.message = String.format("%s%c%s%c%s", parameter, separator, payload, separator, timestamp);
+        this.message = String.format("%s%s%s%s%s", parameter, new String(separator), payload, new String(separator), timestamp);
     }
 
-    public byte[] dumps(String payload) {
-        try {
-            return signer.sign(payload.getBytes());
-        } catch (Exception e) {
-            return new byte[]{};
-        }
-    }
-
-
-    public void unsign() throws BadSignatureException {
-        signer.fast_unsign(this.message.getBytes(), this.signature.getBytes());
-    }
-
-
-    public byte getSeparator() {
-        return separator;
-    }
-
-    @Override
-    public String serialize() {
-        return String.format("%s%c%s%c%s", payload, separator, timestamp, separator, signature);
+    public byte[] getSignature() {
+        return Base64.getUrlDecoder().decode(signature);
     }
 
 }

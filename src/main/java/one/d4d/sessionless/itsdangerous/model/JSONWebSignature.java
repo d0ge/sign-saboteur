@@ -8,10 +8,10 @@ import java.util.Base64;
 public class JSONWebSignature extends SignedToken {
     public String header;
     public String payload;
-    public byte separator;
+    public byte[] separator;
 
-    public JSONWebSignature(String header, String payload, String signature, byte separator) {
-        super(String.format("%s%c%s", header, (char) separator, payload));
+    public JSONWebSignature(String header, String payload, String signature, byte[] separator) {
+        super(String.format("%s%s%s", header, new String(separator), payload));
         this.header = header;
         this.payload = payload;
         this.signature = signature;
@@ -44,16 +44,16 @@ public class JSONWebSignature extends SignedToken {
     }
 
     public byte[] getSeparator() {
-        return new byte[]{separator};
+        return separator;
     }
 
-    public void setSeparator(byte separator) {
+    public void setSeparator(byte[] separator) {
         this.separator = separator;
     }
 
     @Override
     public String serialize() {
-        return String.format("%s%c%s%c%s", header, (char) separator, payload, (char) separator, signature);
+        return String.format("%s%s%s%s%s", header, new String(separator), payload, new String(separator), signature);
     }
 
 
@@ -64,7 +64,7 @@ public class JSONWebSignature extends SignedToken {
     @Override
     public void setClaims(JWTClaimsSet claims) {
         this.payload = new String(Base64.getUrlEncoder().withoutPadding().encode(claims.toString().getBytes()));
-        this.message = String.format("%s%c%s", header, (char) separator, payload);
+        this.message = String.format("%s%s%s", header, new String(separator), payload);
     }
 
     @Override

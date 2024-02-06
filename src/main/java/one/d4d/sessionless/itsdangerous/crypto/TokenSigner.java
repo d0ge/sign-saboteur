@@ -14,26 +14,25 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.UUID;
+import java.util.*;
 
 public class TokenSigner implements Cloneable {
     public Algorithms digestMethod = Algorithms.SHA1;
     public Derivation keyDerivation = Derivation.HMAC;
     public MessageDerivation messageDerivation = MessageDerivation.NONE;
     public MessageDigestAlgorithm messageDigestAlgorithm = MessageDigestAlgorithm.SHA1;
+    public Set<Derivation> knownDerivations = EnumSet.allOf(Derivation.class);
     public byte[] secret_key;
     public byte[] salt = "itsdangerous.Signer".getBytes();
-    public byte sep;
+    public byte[] sep;
 
-    public TokenSigner(Algorithms digestMethod, byte[] secret_key, byte sep) {
+    public TokenSigner(Algorithms digestMethod, byte[] secret_key, byte[] sep) {
         this.digestMethod = digestMethod;
         this.secret_key = secret_key;
         this.sep = sep;
     }
 
-    public TokenSigner(byte[] secret_key, byte sep) {
+    public TokenSigner(byte[] secret_key, byte[] sep) {
         this.secret_key = secret_key;
         this.sep = sep;
     }
@@ -44,11 +43,11 @@ public class TokenSigner implements Cloneable {
         this.messageDerivation = key.getMessageDerivation();
         this.secret_key = key.getSecret().getBytes();
         this.salt = key.getSalt().getBytes();
-        this.sep = key.getSeparator().getBytes().length > 0 ? key.getSeparator().getBytes()[0] : 46;
+        this.sep = key.getSeparator().getBytes().length > 0 ? key.getSeparator().getBytes() : new byte[]{46};
         this.messageDigestAlgorithm = key.getMessageDigestAlgorythm();
     }
 
-    public TokenSigner(Algorithms digestMethod, Derivation keyDerivation, byte[] secret_key, byte[] salt, byte sep) {
+    public TokenSigner(Algorithms digestMethod, Derivation keyDerivation, byte[] secret_key, byte[] salt, byte[] sep) {
         this.digestMethod = digestMethod;
         this.keyDerivation = keyDerivation;
         this.secret_key = secret_key;
@@ -56,7 +55,7 @@ public class TokenSigner implements Cloneable {
         this.sep = sep;
     }
 
-    public TokenSigner(Algorithms digestMethod, Derivation keyDerivation, MessageDerivation messageDerivation, MessageDigestAlgorithm digest, byte[] secret_key, byte[] salt, byte sep) {
+    public TokenSigner(Algorithms digestMethod, Derivation keyDerivation, MessageDerivation messageDerivation, MessageDigestAlgorithm digest, byte[] secret_key, byte[] salt, byte[] sep) {
         this.digestMethod = digestMethod;
         this.keyDerivation = keyDerivation;
         this.messageDerivation = messageDerivation;
@@ -82,12 +81,12 @@ public class TokenSigner implements Cloneable {
         this.keyDerivation = keyDerivation;
     }
 
-    public void setMessageDerivation(MessageDerivation messageDerivation) {
-        this.messageDerivation = messageDerivation;
-    }
-
     public MessageDerivation getMessageDerivation() {
         return messageDerivation;
+    }
+
+    public void setMessageDerivation(MessageDerivation messageDerivation) {
+        this.messageDerivation = messageDerivation;
     }
 
     public MessageDigestAlgorithm getMessageDigestAlgorythm() {
@@ -95,11 +94,11 @@ public class TokenSigner implements Cloneable {
     }
 
 
-    public byte getSep() {
+    public byte[] getSep() {
         return sep;
     }
 
-    public void setSep(byte sep) {
+    public void setSep(byte[] sep) {
         this.sep = sep;
     }
 
@@ -124,9 +123,9 @@ public class TokenSigner implements Cloneable {
     }
 
     public byte[] derive_message(byte[] value) {
-        switch (messageDerivation){
+        switch (messageDerivation) {
             case TORNADO -> {
-                return Bytes.concat(value, new byte[] {sep});
+                return Bytes.concat(value, sep);
             }
             case CONCAT -> {
                 return Bytes.concat(Utils.split(value, sep));
@@ -136,10 +135,9 @@ public class TokenSigner implements Cloneable {
             }
         }
     }
+
     public byte[] derive_key() throws DerivationException {
         try {
-            if (messageDigestAlgorithm == MessageDigestAlgorithm.NONE) return secret_key;
-            MessageDigest msdDigest = MessageDigest.getInstance(messageDigestAlgorithm.name);
             switch (keyDerivation) {
                 case PBKDF2HMAC -> {
                     KeySpec spec = new PBEKeySpec(
@@ -152,14 +150,20 @@ public class TokenSigner implements Cloneable {
                     return f.generateSecret(spec).getEncoded();
                 }
                 case HASH -> {
+                    if (messageDigestAlgorithm == MessageDigestAlgorithm.NONE) return secret_key;
+                    MessageDigest msdDigest = MessageDigest.getInstance(messageDigestAlgorithm.name);
                     msdDigest.update(secret_key);
                     return msdDigest.digest();
                 }
                 case CONCAT -> {
+                    if (messageDigestAlgorithm == MessageDigestAlgorithm.NONE) return secret_key;
+                    MessageDigest msdDigest = MessageDigest.getInstance(messageDigestAlgorithm.name);
                     msdDigest.update(Bytes.concat(salt, secret_key));
                     return msdDigest.digest();
                 }
                 case DJANGO -> {
+                    if (messageDigestAlgorithm == MessageDigestAlgorithm.NONE) return secret_key;
+                    MessageDigest msdDigest = MessageDigest.getInstance(messageDigestAlgorithm.name);
                     msdDigest.update(Bytes.concat(salt, "signer".getBytes(), secret_key));
                     return msdDigest.digest();
                 }
@@ -171,6 +175,36 @@ public class TokenSigner implements Cloneable {
                 }
                 case NONE -> {
                     return secret_key;
+                }
+                case RUBY -> {
+                    KeySpec spec = new PBEKeySpec(
+                            (new String(secret_key)).toCharArray(),
+                            salt,
+                            1000,
+                            64 * 8
+                    );
+                    SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+                    return f.generateSecret(spec).getEncoded();
+                }
+                case RUBY5 -> {
+                    KeySpec spec = new PBEKeySpec(
+                            (new String(secret_key)).toCharArray(),
+                            salt,
+                            65536,
+                            64 * 8
+                    );
+                    SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+                    return f.generateSecret(spec).getEncoded();
+                }
+                case RUBY5_TRUNCATED -> {
+                    KeySpec spec = new PBEKeySpec(
+                            (new String(secret_key)).toCharArray(),
+                            salt,
+                            65536,
+                            32 * 8
+                    );
+                    SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+                    return f.generateSecret(spec).getEncoded();
                 }
                 default -> throw new DerivationException("Unknown key derivation method");
             }
@@ -217,7 +251,7 @@ public class TokenSigner implements Cloneable {
     }
 
     public byte[] sign(byte[] value) {
-        return Bytes.concat(value, new byte[]{sep}, get_signature(value));
+        return Bytes.concat(value, sep, get_signature(value));
     }
 
     public boolean verify_signature(byte[] value, byte[] sign) {
@@ -240,7 +274,7 @@ public class TokenSigner implements Cloneable {
     }
 
     public byte[] unsign(byte[] value) throws BadSignatureException {
-        int i = Bytes.lastIndexOf(value, sep);
+        int i = Collections.lastIndexOfSubList(Bytes.asList(value), Bytes.asList(sep));
         byte[] message = Arrays.copyOfRange(value, 0, i);
         byte[] signature = Arrays.copyOfRange(value, i + 1, value.length);
         return fast_unsign(message, signature);
@@ -266,7 +300,7 @@ public class TokenSigner implements Cloneable {
                 UUID.randomUUID().toString(),
                 new String(secret_key),
                 new String(salt),
-                String.valueOf((char) sep),
+                new String(sep),
                 digestMethod,
                 keyDerivation,
                 messageDerivation, messageDigestAlgorithm);
@@ -287,5 +321,57 @@ public class TokenSigner implements Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    public List<TokenSigner> cloneWithSaltDerivation(String secret, Set<String> salts) {
+        List<TokenSigner> copies = new ArrayList<>();
+        if (keyDerivation == Derivation.NONE || keyDerivation == Derivation.HASH) {
+            TokenSigner s = this.clone();
+            s.setSecretKey(secret.getBytes());
+            copies.add(s);
+        } else {
+            salts.forEach(salt -> {
+                TokenSigner s = this.clone();
+                s.setSecretKey(secret.getBytes());
+                s.setSalt(salt.getBytes());
+                copies.add(s);
+            });
+        }
+        return copies;
+    }
+
+    public List<TokenSigner> cloneWithSaltDerivation(
+            String secret,
+            Set<String> salts,
+            Derivation keyDerivation) {
+        this.keyDerivation = keyDerivation;
+        return this.cloneWithSaltDerivation(secret, salts);
+    }
+
+    public List<TokenSigner> cloneWithSaltDerivation(
+            String secret,
+            Set<String> salts,
+            Derivation keyDerivation,
+            MessageDerivation messageDerivation,
+            MessageDigestAlgorithm messageDigestAlgorithm) {
+        this.keyDerivation = keyDerivation;
+        this.messageDerivation = messageDerivation;
+        this.messageDigestAlgorithm = messageDigestAlgorithm;
+        return this.cloneWithSaltDerivation(secret, salts);
+    }
+
+    public List<TokenSigner> cloneWithSaltDerivation(
+            String secret,
+            Set<String> salts,
+            Derivation keyDerivation,
+            MessageDerivation messageDerivation) {
+        this.keyDerivation = keyDerivation;
+        this.messageDerivation = messageDerivation;
+        return this.cloneWithSaltDerivation(secret, salts);
+    }
+
+    public Set<Derivation> getKnownDerivations() {
+        this.knownDerivations.add(keyDerivation);
+        return knownDerivations;
     }
 }

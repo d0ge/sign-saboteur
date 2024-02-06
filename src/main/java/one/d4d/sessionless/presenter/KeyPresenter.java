@@ -6,6 +6,7 @@ import burp.config.KeysModelListener;
 import one.d4d.sessionless.forms.WordlistView;
 import one.d4d.sessionless.forms.dialog.KeyDialog;
 import one.d4d.sessionless.forms.dialog.NewKeyDialog;
+import one.d4d.sessionless.forms.dialog.NewWordDialog;
 import one.d4d.sessionless.keys.SecretKey;
 import one.d4d.sessionless.utils.Utils;
 
@@ -13,6 +14,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 import static one.d4d.sessionless.utils.Utils.prettyPrintJSON;
 
@@ -52,6 +54,18 @@ public class KeyPresenter extends Presenter {
         readSecretsFromFile(e);
     }
 
+    public void onButtonAddSecretsClick(ActionEvent e) {
+        NewWordDialog d = new NewWordDialog(view.getParent());
+        d.display();
+
+        // If the dialog returned an item, add it to the model
+        String item = d.getItem();
+        if (item != null) {
+            model.addSecret(item);
+            modelSecrets.addElement(item);
+        }
+    }
+
     public void onButtonRemoveSecretsClick(ActionEvent e) {
         JList listSecrets = view.getSecretsList();
         ListSelectionModel selmodel = listSecrets.getSelectionModel();
@@ -72,6 +86,19 @@ public class KeyPresenter extends Presenter {
 
     public void onButtonLoadSaltsClick(ActionEvent e) {
         readSaltsFromFile(e);
+    }
+
+    public void onButtonAddSaltsClick(ActionEvent e) {
+
+        NewWordDialog d = new NewWordDialog(view.getParent());
+        d.display();
+
+        // If the dialog returned an item, add it to the model
+        String item = d.getItem();
+        if (item != null) {
+            model.addSalt(item);
+            modelSalts.addElement(item);
+        }
     }
 
     public void onButtonRemoveSaltsClick(ActionEvent e) {
@@ -149,7 +176,7 @@ public class KeyPresenter extends Presenter {
         int returnVal = fc.showOpenDialog(view.getUiComponent());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fc.getSelectedFile();
-            List<String> s = Utils.deserializeFile(selectedFile);
+            Set<String> s = Utils.deserializeFile(selectedFile);
             if (!s.isEmpty()) {
                 model.setSecrets(s);
                 model.setSecretsFilePath(selectedFile.getAbsolutePath());
@@ -166,7 +193,7 @@ public class KeyPresenter extends Presenter {
         int returnVal = fc.showOpenDialog(view.getUiComponent());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fc.getSelectedFile();
-            List<String> s = Utils.deserializeFile(selectedFile);
+            Set<String> s = Utils.deserializeFile(selectedFile);
             if (!s.isEmpty()) {
                 model.setSalts(s);
                 model.setSaltsFilePath(selectedFile.getAbsolutePath());
@@ -178,11 +205,11 @@ public class KeyPresenter extends Presenter {
         }
     }
 
-    public List<String> getSecrets() {
+    public Set<String> getSecrets() {
         return model.getSecrets();
     }
 
-    public List<String> getSalts() {
+    public Set<String> getSalts() {
         return model.getSalts();
     }
 

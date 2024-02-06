@@ -20,14 +20,14 @@ import static burp.api.montoya.internal.ObjectFactoryLocator.FACTORY;
 public class ResponseEditorView extends EditorTab implements ExtensionProvidedHttpResponseEditor {
 
     public ResponseEditorView(
-              PresenterStore presenters,
-              RstaFactory rstaFactory,
-              Logging logging,
-              UserInterface userInterface,
-              CollaboratorPayloadGenerator collaboratorPayloadGenerator,
-              SignerConfig signerConfig,
-              boolean editable,
-              boolean isProVersion) {
+            PresenterStore presenters,
+            RstaFactory rstaFactory,
+            Logging logging,
+            UserInterface userInterface,
+            CollaboratorPayloadGenerator collaboratorPayloadGenerator,
+            SignerConfig signerConfig,
+            boolean editable,
+            boolean isProVersion) {
         super(
                 presenters,
                 rstaFactory,
@@ -52,7 +52,7 @@ public class ResponseEditorView extends EditorTab implements ExtensionProvidedHt
         } catch (Exception e) {
             targetURL = null;
         }
-        presenter.setMessage(httpResponse.toByteArray().toString(),targetURL,httpResponse.cookies(),null);
+        presenter.setMessage(httpResponse.toByteArray().toString(), targetURL, httpResponse.cookies(), null);
     }
 
     @Override

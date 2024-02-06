@@ -8,42 +8,40 @@ import one.d4d.sessionless.utils.Utils;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 
-public class TornadoTokenSigner extends TokenSigner{
+public class TornadoTokenSigner extends TokenSigner {
     public TornadoTokenSigner(SecretKey key) {
         super(key);
+        this.knownDerivations = EnumSet.of(Derivation.NONE);
     }
+
     public TornadoTokenSigner() {
-        super(Algorithms.SHA1, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE,new byte[] {}, new byte[] {}, (byte) '|');
+        this(new byte[]{}, new byte[]{'|'});
     }
-    public TornadoTokenSigner( byte sep) {
-        super(new byte[] {}, sep);
+
+    public TornadoTokenSigner(byte[] secret_key, byte[] sep) {
+        this(Algorithms.SHA1, Derivation.NONE, MessageDerivation.NONE, MessageDigestAlgorithm.NONE, secret_key, new byte[]{}, sep);
     }
-    public TornadoTokenSigner( byte[] secret_key, byte sep) {
-        super(secret_key, sep);
+
+    public TornadoTokenSigner(
+            Algorithms digestMethod,
+            Derivation keyDerivation,
+            MessageDerivation messageDerivation,
+            MessageDigestAlgorithm digest,
+            byte[] secret_key,
+            byte[] salt,
+            byte[] sep) {
+        super(digestMethod, keyDerivation, messageDerivation, digest, secret_key, salt, sep);
+        this.knownDerivations = EnumSet.of(Derivation.NONE);
     }
 
     @Override
     public byte[] derive_key() throws DerivationException {
         return secret_key;
     }
-    @Override
-    public boolean verify_signature(byte[] value, byte[] signature) {
-        try {
-            byte[] expected = get_signature_bytes(value);
-            return Arrays.equals(expected, signature);
-        }catch (Exception e){
-            return false;
-        }
-    }
-    @Override
-    public byte[] get_signature_unsafe(byte[] value) throws Exception {
-        byte[] key = derive_key();
-        SecretKeySpec signingKey = new SecretKeySpec(key, digestMethod.name);
-        Mac mac = Mac.getInstance(digestMethod.name);
-        mac.init(signingKey);
-        return mac.doFinal(value);
-    }
+
     @Override
     public byte[] get_signature(byte[] value) {
         try {
@@ -53,8 +51,17 @@ public class TornadoTokenSigner extends TokenSigner{
             mac.init(signingKey);
             return mac.doFinal(value);
         } catch (Exception e) {
-            return new byte[] {};
+            return new byte[]{};
         }
+    }
+
+    @Override
+    public byte[] get_signature_unsafe(byte[] value) throws Exception {
+        byte[] key = derive_key();
+        SecretKeySpec signingKey = new SecretKeySpec(key, digestMethod.name);
+        Mac mac = Mac.getInstance(digestMethod.name);
+        mac.init(signingKey);
+        return mac.doFinal(value);
     }
 
     @Override
@@ -66,16 +73,26 @@ public class TornadoTokenSigner extends TokenSigner{
             mac.init(signingKey);
             return mac.doFinal(value);
         } catch (Exception e) {
-            return new byte[] {};
+            return new byte[]{};
+        }
+    }
+
+    @Override
+    public boolean verify_signature(byte[] value, byte[] signature) {
+        try {
+            byte[] expected = get_signature_bytes(value);
+            return Arrays.equals(expected, signature);
+        } catch (Exception e) {
+            return false;
         }
     }
 
     @Override
     public byte[] unsign(byte[] value) throws BadSignatureException {
-        int i = Bytes.lastIndexOf(value, sep);
+        int i = Collections.lastIndexOfSubList(Bytes.asList(value), Bytes.asList(sep));
         // Note! Tornado uses last delimiter for signature calculation.
-        byte[] message = Arrays.copyOfRange(value, 0, i+1);
-        byte[] signature = Arrays.copyOfRange(value, i+1, value.length);
+        byte[] message = Arrays.copyOfRange(value, 0, i + 1);
+        byte[] signature = Arrays.copyOfRange(value, i + 1, value.length);
         byte[] sign = Utils.normalization(signature);
         switch (sign.length) {
             case 28 -> digestMethod = Algorithms.SHA224;

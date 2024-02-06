@@ -2,9 +2,10 @@ package one.d4d.sessionless.forms;
 
 import burp.api.montoya.ui.UserInterface;
 import burp.config.BurpConfig;
-import burp.config.SignerConfig;
-import burp.proxy.HighlightColor;
 import burp.config.ProxyConfig;
+import burp.config.SignerConfig;
+import burp.config.Signers;
+import burp.proxy.HighlightColor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,6 +28,7 @@ public class SettingsView {
     private JCheckBox checkBoxEnableExpressSignedString;
     private JCheckBox checkBoxEnableOAuthSignedString;
     private JCheckBox checkBoxEnableTornadoSignedString;
+    private JCheckBox checkBoxEnableRubySignedString;
 
     public SettingsView(Window parent, BurpConfig burpConfig, UserInterface userInterface) {
         this.parent = parent;
@@ -48,30 +50,30 @@ public class SettingsView {
         userInterface.applyThemeToComponent(mainPanel);
         comboBoxHighlightColor.setRenderer(new HighlightComboRenderer());
 
-        checkBoxEnableDangerousSignedString.setSelected(signerConfig.isEnableDangerous());
-        checkBoxEnableDangerousSignedString.addActionListener(e -> {
-            signerConfig.setEnableDangerous(checkBoxEnableDangerousSignedString.isSelected());
-        });
+        checkBoxEnableDangerousSignedString.setSelected(signerConfig.isEnabled(Signers.DANGEROUS));
+        checkBoxEnableDangerousSignedString.addActionListener(e ->
+                signerConfig.toggleEnabled(Signers.DANGEROUS, checkBoxEnableDangerousSignedString.isSelected()));
 
-        checkBoxEnableExpressSignedString.setSelected(signerConfig.isEnableExpress());
-        checkBoxEnableExpressSignedString.addActionListener(e -> {
-            signerConfig.setEnableExpress(checkBoxEnableExpressSignedString.isSelected());
-        });
+        checkBoxEnableExpressSignedString.setSelected(signerConfig.isEnabled(Signers.EXPRESS));
+        checkBoxEnableExpressSignedString.addActionListener(e ->
+                signerConfig.toggleEnabled(Signers.EXPRESS, checkBoxEnableExpressSignedString.isSelected()));
 
-        checkBoxEnableOAuthSignedString.setSelected(signerConfig.isEnableOAuth());
-        checkBoxEnableOAuthSignedString.addActionListener(e -> {
-            signerConfig.setEnableOAuth(checkBoxEnableOAuthSignedString.isSelected());
-        });
+        checkBoxEnableOAuthSignedString.setSelected(signerConfig.isEnabled(Signers.OAUTH));
+        checkBoxEnableOAuthSignedString.addActionListener(e ->
+                signerConfig.toggleEnabled(Signers.OAUTH, checkBoxEnableOAuthSignedString.isSelected()));
 
-        checkBoxEnableTornadoSignedString.setSelected(signerConfig.isEnableTornado());
-        checkBoxEnableTornadoSignedString.addActionListener(e -> {
-            signerConfig.setEnableTornado(checkBoxEnableTornadoSignedString.isSelected());
-        });
+        checkBoxEnableTornadoSignedString.setSelected(signerConfig.isEnabled(Signers.TORNADO));
+        checkBoxEnableTornadoSignedString.addActionListener(e ->
+                signerConfig.toggleEnabled(Signers.TORNADO, checkBoxEnableTornadoSignedString.isSelected()));
 
-        checkBoxEnableUnknownSignedString.setSelected(signerConfig.isEnableUnknown());
-        checkBoxEnableUnknownSignedString.addActionListener(e -> {
-            signerConfig.setEnableUnknown(checkBoxEnableUnknownSignedString.isSelected());
-        });
+        checkBoxEnableRubySignedString.setSelected(signerConfig.isEnabled(Signers.RUBY));
+        checkBoxEnableRubySignedString.addActionListener(e ->
+                signerConfig.toggleEnabled(Signers.RUBY, checkBoxEnableRubySignedString.isSelected()));
+
+        checkBoxEnableUnknownSignedString.setSelected(signerConfig.isEnabled(Signers.UNKNOWN));
+        checkBoxEnableUnknownSignedString.addActionListener(e ->
+                signerConfig.toggleEnabled(Signers.UNKNOWN, checkBoxEnableUnknownSignedString.isSelected()));
+
     }
 
     private static class HighlightComboRenderer implements ListCellRenderer<HighlightColor> {

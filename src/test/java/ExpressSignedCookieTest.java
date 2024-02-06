@@ -14,8 +14,9 @@ import java.util.Optional;
 public class ExpressSignedCookieTest {
     @Test
     void OauthProxyParserTest() {
-        byte[] secret ="key1".getBytes();
-        ExpressTokenSigner s = new ExpressTokenSigner(secret, (byte) '.');
+        byte[] secret = "key1".getBytes();
+        byte[] sep = new byte[]{(byte) '.'};
+        ExpressTokenSigner s = new ExpressTokenSigner(secret, sep);
 
         String payload = "eyJwYXNzcG9ydCI6eyJ1c2VyIjoiYWRtaW4ifSwiZmxhc2giOnt9fQ==";
         String signature = "zNzk1rU-uVc2rF2sGxxkt1t_4ewHRQtuE5OTD8b2FQnMZZV-c1A1eUwV6j4_s2hL";
@@ -26,15 +27,15 @@ public class ExpressSignedCookieTest {
         cookies.add(signatureCookie);
         Assertions.assertDoesNotThrow(() -> {
             Optional<ExpressSignedToken> token =
-                SignedTokenObjectFinder.parseSignedTokenWithinCookies(cookies)
-                        .stream()
-                        .map(MutableSignedToken::getModified)
-                        .map(ExpressSignedToken.class::cast)
-                        .findFirst();
-            if (token.isPresent()){
+                    SignedTokenObjectFinder.parseSignedTokenWithinCookies(cookies)
+                            .stream()
+                            .map(MutableSignedToken::getModified)
+                            .map(ExpressSignedToken.class::cast)
+                            .findFirst();
+            if (token.isPresent()) {
                 token.get().setSigner(s);
                 token.get().unsign();
-            }else throw new Exception("Missed cookie");
+            } else throw new Exception("Missed cookie");
         });
     }
 }

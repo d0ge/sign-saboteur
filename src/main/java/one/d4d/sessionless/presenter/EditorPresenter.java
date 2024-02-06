@@ -17,6 +17,7 @@ import one.d4d.sessionless.utils.Utils;
 import java.net.URL;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 
 import static one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder.containsSignedTokenObjects;
 
@@ -71,14 +72,14 @@ public class EditorPresenter extends Presenter {
         if (view.getDangerouseIsDjangoFormatting()) {
             timestamp = Utils.encodeBase62TimestampFromDate(view.getDangerousTimestamp());
             return new DjangoSignedToken(
-                    separator[0],
+                    separator,
                     payload,
                     timestamp,
                     signature);
         } else {
             timestamp = Utils.encodeBase64TimestampFromDate(view.getDangerousTimestamp());
             return new DangerousSignedToken(
-                    separator[0],
+                    separator,
                     payload,
                     timestamp,
                     signature);
@@ -161,13 +162,27 @@ public class EditorPresenter extends Presenter {
         view.setTornadoValue(token.getValue());
         view.setTornadoSignature(token.getSignature());
     }
-    private UnknownSignedToken getUnknown() {
 
+    private RubySignedToken getRuby() {
+        String message = view.getRubyMessage();
+        String signature = view.getRubySignature();
+        byte[] separator = view.getRubySeparator().length == 0 ? new byte[]{46} : view.getRubySeparator();
+
+        return new RubySignedToken(message, signature, separator);
+    }
+
+    private void setRuby(RubySignedToken token) {
+        view.setRubyMessage(token.getEncodedMessage());
+        view.setRubySignature(token.getEncodedSignature());
+        view.setRubySeparator(token.getSeparator());
+    }
+
+    private UnknownSignedToken getUnknown() {
         String message = view.getUnknownMessage();
         String signature = view.getUnknownSignature();
         byte[] separator = view.getUnknownSeparator().length == 0 ? new byte[]{46} : view.getUnknownSeparator();
 
-        return new UnknownSignedToken(message,signature,separator[0]);
+        return new UnknownSignedToken(message, signature, separator);
     }
 
     private void setUnknown(UnknownSignedToken token) {
@@ -186,6 +201,7 @@ public class EditorPresenter extends Presenter {
             case EditorTab.TAB_EXPRESS -> tokenObject = getExpress();
             case EditorTab.TAB_OAUTH -> tokenObject = getOAuth();
             case EditorTab.TAB_TORNADO -> tokenObject = getTornado();
+            case EditorTab.TAB_RUBY -> tokenObject = getRuby();
             default -> tokenObject = getUnknown();
         }
         mutableSignedTokenObject.setModified(tokenObject);
@@ -210,6 +226,9 @@ public class EditorPresenter extends Presenter {
         } else if (tokenObject instanceof TornadoSignedToken) {
             view.setTornadoMode();
             setTornado((TornadoSignedToken) tokenObject);
+        } else if (tokenObject instanceof RubySignedToken) {
+            view.setRubyMode();
+            setRuby((RubySignedToken) tokenObject);
         } else if (tokenObject instanceof UnknownSignedToken) {
             view.setUnknownMode();
             setUnknown((UnknownSignedToken) tokenObject);
@@ -224,6 +243,7 @@ public class EditorPresenter extends Presenter {
     public void onSignClicked() {
         signingDialog();
     }
+
     public void onAttackClicked() {
         attackDialog();
     }
@@ -262,12 +282,16 @@ public class EditorPresenter extends Presenter {
             } else if (signed instanceof TornadoSignedToken) {
                 view.setTornadoMode();
                 setTornado((TornadoSignedToken) signed);
+            } else if (signed instanceof RubySignedToken) {
+                view.setRubyMode();
+                setRuby((RubySignedToken) signed);
             } else if (signed instanceof UnknownSignedToken) {
                 view.setUnknownMode();
                 setUnknown((UnknownSignedToken) signed);
             }
         }
     }
+
     private void signingDialog() {
         KeyPresenter keysPresenter = (KeyPresenter) presenters.get(KeyPresenter.class);
 
@@ -301,6 +325,9 @@ public class EditorPresenter extends Presenter {
             } else if (signed instanceof TornadoSignedToken) {
                 view.setTornadoMode();
                 setTornado((TornadoSignedToken) signed);
+            } else if (signed instanceof RubySignedToken) {
+                view.setRubyMode();
+                setRuby((RubySignedToken) signed);
             } else if (signed instanceof UnknownSignedToken) {
                 view.setUnknownMode();
                 setUnknown((UnknownSignedToken) signed);
@@ -314,8 +341,8 @@ public class EditorPresenter extends Presenter {
         MutableSignedToken mutableJoseObject = model.getSignedTokenObject(view.getSelectedSignedTokenObjectIndex());
         SignedToken tokenObject = mutableJoseObject.getModified();
 
-        List<String> attackKeys = keysPresenter.getSecrets();
-        List<String> attackSalts = keysPresenter.getSalts();
+        Set<String> attackKeys = keysPresenter.getSecrets();
+        Set<String> attackSalts = keysPresenter.getSalts();
 
         if (attackKeys.size() == 0) {
             messageDialogFactory.showWarningDialog("error_title_no_secrets", "error_no_secrets");
@@ -324,6 +351,11 @@ public class EditorPresenter extends Presenter {
 
         if (attackSalts.size() == 0) {
             messageDialogFactory.showWarningDialog("error_title_no_salts", "error_no_salts");
+            return;
+        }
+
+        if (keysPresenter.getSigningKeys().size() == 0 && mode == Attack.KNOWN) {
+            messageDialogFactory.showWarningDialog("error_title_no_signing_keys", "error_no_signing_keys");
             return;
         }
 
@@ -354,6 +386,7 @@ public class EditorPresenter extends Presenter {
     public void onAttackKnownKeysClicked() {
         onAttackClicked(Attack.KNOWN);
     }
+
     public void onAttackFastClicked() {
         onAttackClicked(Attack.FAST);
     }

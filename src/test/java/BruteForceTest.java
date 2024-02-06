@@ -7,9 +7,7 @@ import one.d4d.sessionless.keys.SecretKey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class BruteForceTest {
 
@@ -19,14 +17,15 @@ public class BruteForceTest {
             Optional<SignedToken> optionalSignedToken = SignedTokenObjectFinder.parseToken("e30.Zm17Ig.Ajtll0l5CXAy9Yqgy-vvhF05G28");
             if (optionalSignedToken.isPresent()) {
                 SignedToken token = optionalSignedToken.get();
-                DangerousTokenSigner s = new DangerousTokenSigner((byte) '.');
+                byte[] sep = new byte[]{'.'};
+                DangerousTokenSigner s = new DangerousTokenSigner(sep);
                 token.setSigner(s);
-                final List<String> secrets = List.of("secret");
-                final List<String> salts = List.of("salt");
+                final Set<String> secrets = new HashSet<>(List.of("secret"));
+                final Set<String> salts = new HashSet<>(List.of("salt"));
                 final List<SecretKey> knownKeys = new ArrayList<>();
 
                 BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.FAST, token);
-                SecretKey sk = bf.search();
+                SecretKey sk = bf.parallel();
                 Assertions.assertNotNull(sk);
             } else {
                 Assertions.fail("Token not found.");
@@ -40,14 +39,15 @@ public class BruteForceTest {
             Optional<SignedToken> optionalSignedToken = SignedTokenObjectFinder.parseToken("e30.Zm17Ig.Ajtll0l5CXAy9Yqgy-vvhF05G28");
             if (optionalSignedToken.isPresent()) {
                 SignedToken token = optionalSignedToken.get();
-                DangerousTokenSigner s = new DangerousTokenSigner((byte) '.');
+                byte[] sep = new byte[]{'.'};
+                DangerousTokenSigner s = new DangerousTokenSigner(sep);
                 token.setSigner(s);
-                final List<String> secrets = List.of("secret");
-                final List<String> salts = List.of("salt");
+                final Set<String> secrets = new HashSet<>(List.of("secret"));
+                final Set<String> salts = new HashSet<>(List.of("salt"));
                 final List<SecretKey> knownKeys = new ArrayList<>();
 
                 BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.FAST, token);
-                SecretKey sk = bf.search();
+                SecretKey sk = bf.parallel();
                 Assertions.assertNotNull(sk);
             } else {
                 Assertions.fail("Token not found.");

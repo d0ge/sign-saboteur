@@ -33,7 +33,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public static final int TAB_EXPRESS = 1;
     public static final int TAB_OAUTH = 2;
     public static final int TAB_TORNADO = 3;
-    public static final int TAB_UNKNOWN = 4;
+    public static final int TAB_RUBY = 4;
+    public static final int TAB_UNKNOWN = 5;
     private static final int MAX_JOSE_OBJECT_STRING_LENGTH = 68;
     final EditorPresenter presenter;
     private final RstaFactory rstaFactory;
@@ -71,10 +72,14 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     private RSyntaxTextArea textAreaUnknownStringMessage;
     private JPanel panelUnknownStringSeparator;
     private RSyntaxTextArea textAreaUnknownStringSignature;
+    private JPanel panelRubySeparator;
+    private RSyntaxTextArea textAreaRubyMessage;
+    private RSyntaxTextArea textAreaRubySignature;
     private CodeArea codeAreaDangerousSignature;
     private CodeArea codeAreaDangerousSeparator;
     private CodeArea codeAreaOAuthSignature;
     private CodeArea codeAreaTornadoSignature;
+    private CodeArea codeAreaRubySeparator;
     private CodeArea codeAreaUnknownSeparator;
 
     EditorTab(
@@ -126,6 +131,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         textAreaTornadoTimestamp.getDocument().addDocumentListener(documentListener);
         textAreaTornadoName.getDocument().addDocumentListener(documentListener);
         textAreaTornadoValue.getDocument().addDocumentListener(documentListener);
+        textAreaRubyMessage.getDocument().addDocumentListener(documentListener);
+        textAreaRubySignature.getDocument().addDocumentListener(documentListener);
         textAreaUnknownStringMessage.getDocument().addDocumentListener(documentListener);
         textAreaUnknownStringSignature.getDocument().addDocumentListener(documentListener);
 
@@ -137,6 +144,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         codeAreaDangerousSeparator.addDataChangedListener(presenter::componentChanged);
         codeAreaOAuthSignature.addDataChangedListener(presenter::componentChanged);
         codeAreaTornadoSignature.addDataChangedListener(presenter::componentChanged);
+        codeAreaRubySeparator.addDataChangedListener(presenter::componentChanged);
         codeAreaUnknownSeparator.addDataChangedListener(presenter::componentChanged);
 
         comboBoxSignedToken.addActionListener(e -> presenter.onSelectionChanged());
@@ -252,6 +260,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setTornadoSignature(byte[] signature) {
         codeAreaTornadoSignature.setData(new ByteArrayEditableData(signature));
     }
+
     public byte[] getDangerousSignature() {
         return Utils.getCodeAreaData(codeAreaDangerousSignature);
     }
@@ -307,6 +316,31 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setDangerouseIsCompressed(boolean enabled) {
         checkBoxCompress.setSelected(enabled);
     }
+
+    public String getRubyMessage() {
+        return textAreaRubyMessage.getText();
+    }
+
+    public void setRubyMessage(String text) {
+        textAreaRubyMessage.setText(text);
+    }
+
+    public String getRubySignature() {
+        return textAreaRubySignature.getText();
+    }
+
+    public void setRubySignature(String signature) {
+        textAreaRubySignature.setText(signature);
+    }
+
+    public byte[] getRubySeparator() {
+        return Utils.getCodeAreaData(codeAreaRubySeparator);
+    }
+
+    public void setRubySeparator(byte[] separator) {
+        codeAreaRubySeparator.setData(new ByteArrayEditableData(separator));
+    }
+
     public String getUnknownMessage() {
         return textAreaUnknownStringMessage.getText();
     }
@@ -314,6 +348,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setUnknownMessage(String text) {
         textAreaUnknownStringMessage.setText(text);
     }
+
     public String getUnknownSignature() {
         return textAreaUnknownStringSignature.getText();
     }
@@ -321,6 +356,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setUnknownSignature(String signature) {
         textAreaUnknownStringSignature.setText(signature);
     }
+
     public byte[] getUnknownSeparator() {
         return Utils.getCodeAreaData(codeAreaUnknownSeparator);
     }
@@ -354,6 +390,11 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         panelTornadoSignature = new JPanel(new BorderLayout());
         codeAreaTornadoSignature = hexCodeAreaFactory.build();
         panelTornadoSignature.add(codeAreaTornadoSignature);
+
+
+        panelRubySeparator = new JPanel(new BorderLayout());
+        codeAreaRubySeparator = hexCodeAreaFactory.build();
+        panelRubySeparator.add(codeAreaRubySeparator);
 
         panelUnknownStringSeparator = new JPanel(new BorderLayout());
         codeAreaUnknownSeparator = hexCodeAreaFactory.build();
@@ -398,6 +439,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         textAreaTornadoTimestamp = rstaFactory.buildDefaultTextArea();
         textAreaTornadoName = rstaFactory.buildDefaultTextArea();
         textAreaTornadoValue = rstaFactory.buildDefaultTextArea();
+        textAreaRubyMessage = rstaFactory.buildDefaultTextArea();
+        textAreaRubySignature = rstaFactory.buildDefaultTextArea();
         textAreaUnknownStringMessage = rstaFactory.buildDefaultTextArea();
         textAreaUnknownStringSignature = rstaFactory.buildDefaultTextArea();
     }
@@ -479,6 +522,20 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         EditationAllowed editationAllowed = editable ? ALLOWED : READ_ONLY;
         codeAreaTornadoSignature.setEditationAllowed(editationAllowed);
     }
+
+    public void setRubyMode() {
+        mode = TAB_RUBY;
+        enableTabAtIndex(TAB_RUBY);
+        buttonBruteForceAttack.setEnabled(editable);
+        buttonAttack.setEnabled(editable);
+
+        textAreaRubyMessage.setEditable(editable);
+        textAreaRubySignature.setEditable(editable);
+
+        EditationAllowed editationAllowed = editable ? ALLOWED : READ_ONLY;
+        codeAreaRubySeparator.setEditationAllowed(editationAllowed);
+    }
+
     public void setUnknownMode() {
         mode = TAB_UNKNOWN;
         enableTabAtIndex(TAB_UNKNOWN);
