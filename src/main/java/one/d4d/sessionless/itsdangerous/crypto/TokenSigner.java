@@ -21,7 +21,8 @@ public class TokenSigner implements Cloneable {
     public Derivation keyDerivation = Derivation.HMAC;
     public MessageDerivation messageDerivation = MessageDerivation.NONE;
     public MessageDigestAlgorithm messageDigestAlgorithm = MessageDigestAlgorithm.SHA1;
-    public Set<Derivation> knownDerivations = EnumSet.allOf(Derivation.class);
+    public Set<Derivation> knownDerivations = EnumSet.of(Derivation.HASH,
+            Derivation.DJANGO, Derivation.CONCAT, Derivation.HMAC, Derivation.NONE);
     public byte[] secret_key;
     public byte[] salt = "itsdangerous.Signer".getBytes();
     public byte[] sep;
