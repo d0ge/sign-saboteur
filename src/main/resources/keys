@@ -1,0 +1,17 @@
+{"keyId":"Flask","secret":"secret","salt":"salt","separator":".","digestMethod":"1","keyDerivation":"5","messageDerivation":"0","messageDigestAlgorythm":"4"}
+{"keyId":"Django","secret":"secret","salt":"django.contrib.sessions.backends.signed_cookies","separator":":","digestMethod":"1","keyDerivation":"4","messageDerivation":"0","messageDigestAlgorythm":"2"}
+{"keyId":"Express1","secret":"key1","salt":"salt","separator":".","digestMethod":"4","keyDerivation":"2","messageDerivation":"0","messageDigestAlgorythm":"1"}
+{"keyId":"Express2","secret":"key2","salt":"salt","separator":".","digestMethod":"4","keyDerivation":"2","messageDerivation":"0","messageDigestAlgorythm":"1"}
+{"keyId":"ExpressMagic","secret":"magic","salt":"salt","separator":".","digestMethod":"4","keyDerivation":"2","messageDerivation":"0","messageDigestAlgorythm":"1"}
+{"keyId":"OAuth2","secret":"j76h5PEMx3FIGr3caArJ5g\u003d\u003d","salt":"salt","separator":"|","digestMethod":"3","keyDerivation":"1","messageDerivation":"0","messageDigestAlgorythm":"7"}
+{"keyId":"Tornado","secret":"secret","salt":"","separator":"|","digestMethod":"3","keyDerivation":"6","messageDerivation":"0","messageDigestAlgorythm":"7"}
+{"keyId":"JSONWebSignature","secret":"secret","salt":"","separator":".","digestMethod":"3","keyDerivation":"6","messageDerivation":"0","messageDigestAlgorythm":"7"}
+{"keyId":"Ruby","secret":"aeb977de013ade650b97e0aa5246813591104017871a7753fe186e9634c9129b367306606878985c759ca4fddd17d955207011bb855ef01ed414398b4ac8317b","salt":"signed encrypted cookie","separator":"--","digestMethod":"1","keyDerivation":"7","messageDerivation":"0","messageDigestAlgorythm":"7"}
+{"keyId":"Ruby5","secret":"aeb977de013ade650b97e0aa5246813591104017871a7753fe186e9634c9129b367306606878985c759ca4fddd17d955207011bb855ef01ed414398b4ac8317b","salt":"signed encrypted cookie","separator":"--","digestMethod":"1","keyDerivation":"8","messageDerivation":"0","messageDigestAlgorythm":"7"}
+{"keyId":"RubyTruncated","secret":"aeb977de013ade650b97e0aa5246813591104017871a7753fe186e9634c9129b367306606878985c759ca4fddd17d955207011bb855ef01ed414398b4ac8317b","salt":"signed encrypted cookie","separator":"--","digestMethod":"1","keyDerivation":"9","messageDerivation":"0","messageDigestAlgorythm":"7"}
+{"keyId":"Superset","secret":"thisISaSECRET_1234","salt":"cookie-session","separator":".","digestMethod":"1","keyDerivation":"5","messageDerivation":"0","messageDigestAlgorythm":"4"}
+{"keyId":"Superset2","secret":"CHANGE_ME_TO_A_COMPLEX_RANDOM_SECRET","salt":"cookie-session","separator":".","digestMethod":"1","keyDerivation":"5","messageDerivation":"0","messageDigestAlgorythm":"4"}
+{"keyId":"Superset3","secret":"YOUR_OWN_RANDOM_GENERATED_SECRET_KEY","salt":"cookie-session","separator":".","digestMethod":"1","keyDerivation":"5","messageDerivation":"0","messageDigestAlgorythm":"4"}
+{"keyId":"Superset4","secret":"TEST_NON_DEV_SECRET","salt":"cookie-session","separator":".","digestMethod":"1","keyDerivation":"5","messageDerivation":"0","messageDigestAlgorythm":"4"}
+{"keyId":"Superset5","secret":"\u0002\u0001thisismyscretkey\u0001\u0002\\e\\y\\y\\h","salt":"cookie-session","separator":".","digestMethod":"1","keyDerivation":"5","messageDerivation":"0","messageDigestAlgorythm":"4"}
+{"keyId":"Redash","secret":"c292a0a3aa32397cdb050e233733900f","salt":"cookie-session","separator":".","digestMethod":"1","keyDerivation":"5","messageDerivation":"0","messageDigestAlgorythm":"4"}

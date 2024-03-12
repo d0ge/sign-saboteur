@@ -32,7 +32,7 @@ public class ProxyHttpMessageHandler implements ProxyRequestHandler, ProxyRespon
     public ProxyResponseReceivedAction handleResponseReceived(InterceptedResponse interceptedResponse) {
         annotationsModifier.updateAnnotationsIfApplicable(
                 interceptedResponse.annotations(),
-                interceptedResponse.toByteArray(),
+                interceptedResponse.toByteArray().subArray(0, interceptedResponse.bodyOffset()),
                 interceptedResponse.cookies(),
                 null);
         return ProxyResponseReceivedAction.continueWith(interceptedResponse);

@@ -12,9 +12,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class EditorModel {
-    private final SignerConfig signerConfig;
     private static final String SERIALIZED_OBJECT_FORMAT_STRING = "%d - %s";
-
+    private final SignerConfig signerConfig;
     private final List<MutableSignedToken> mutableSerializedObjects = new ArrayList<>();
     private final Object lock = new Object();
 
@@ -28,7 +27,7 @@ class EditorModel {
         synchronized (lock) {
             message = content;
             mutableSerializedObjects.clear();
-            mutableSerializedObjects.addAll(SignedTokenObjectFinder.extractSignedTokenObjects(signerConfig,content,cookies,params));
+            mutableSerializedObjects.addAll(SignedTokenObjectFinder.extractSignedTokenObjects(signerConfig, content, cookies, params));
         }
     }
 

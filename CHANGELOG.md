@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.0.7] - 2024-03-12
+
+### Added
+
+- JWT Tab was added for testing purposes
+- Default keys dictionary
+
+### Changed
+
+- Response body was removed from token parser logic due to performance issues
+
 ## [0.0.6] - 2024-02-06
 
 ### Added

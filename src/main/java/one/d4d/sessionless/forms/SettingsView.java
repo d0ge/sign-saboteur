@@ -4,8 +4,8 @@ import burp.api.montoya.ui.UserInterface;
 import burp.config.BurpConfig;
 import burp.config.ProxyConfig;
 import burp.config.SignerConfig;
-import burp.config.Signers;
 import burp.proxy.HighlightColor;
+import one.d4d.sessionless.itsdangerous.crypto.Signers;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,6 +29,7 @@ public class SettingsView {
     private JCheckBox checkBoxEnableOAuthSignedString;
     private JCheckBox checkBoxEnableTornadoSignedString;
     private JCheckBox checkBoxEnableRubySignedString;
+    private JCheckBox checkBoxEnableJWT;
 
     public SettingsView(Window parent, BurpConfig burpConfig, UserInterface userInterface) {
         this.parent = parent;
@@ -69,6 +70,10 @@ public class SettingsView {
         checkBoxEnableRubySignedString.setSelected(signerConfig.isEnabled(Signers.RUBY));
         checkBoxEnableRubySignedString.addActionListener(e ->
                 signerConfig.toggleEnabled(Signers.RUBY, checkBoxEnableRubySignedString.isSelected()));
+
+        checkBoxEnableJWT.setSelected(signerConfig.isEnabled(Signers.JWT));
+        checkBoxEnableJWT.addActionListener(e ->
+                signerConfig.toggleEnabled(Signers.JWT, checkBoxEnableJWT.isSelected()));
 
         checkBoxEnableUnknownSignedString.setSelected(signerConfig.isEnabled(Signers.UNKNOWN));
         checkBoxEnableUnknownSignedString.addActionListener(e ->

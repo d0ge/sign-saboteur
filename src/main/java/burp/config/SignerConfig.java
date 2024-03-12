@@ -1,6 +1,7 @@
 package burp.config;
 
 import com.google.gson.annotations.Expose;
+import one.d4d.sessionless.itsdangerous.crypto.Signers;
 
 import java.util.EnumSet;
 import java.util.Set;

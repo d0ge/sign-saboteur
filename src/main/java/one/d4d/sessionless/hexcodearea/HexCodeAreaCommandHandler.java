@@ -1,6 +1,7 @@
 package one.d4d.sessionless.hexcodearea;
 
 import com.nimbusds.jose.util.Base64URL;
+import one.d4d.sessionless.forms.utils.FormUtils;
 import one.d4d.sessionless.utils.Utils;
 import org.exbin.deltahex.EditationMode;
 import org.exbin.deltahex.swing.CodeArea;
@@ -19,17 +20,17 @@ import static one.d4d.sessionless.utils.HexUtils.encodeHex;
 
 /**
  * Class to handle copy and paste from a CodeArea to/from hexadecimal strings
- *
+ * <p>
  * Modified from https://github.com/exbin/bined-lib-java/blob/5abc397f3091cf2471057e9c7a9943bb19deeb32/modules/bined-swt/src/main/java/org/exbin/bined/swt/basic/DefaultCodeAreaCommandHandler.java
- *
+ * <p>
  * Copyright (C) ExBin Project
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,7 +51,7 @@ class HexCodeAreaCommandHandler extends DefaultCodeAreaCommandHandler {
      */
     @Override
     public void copy() {
-        byte[] data = Utils.getCodeAreaData(codeArea);
+        byte[] data = FormUtils.getCodeAreaData(codeArea);
         Utils.copyToClipboard(encodeHex(data));
     }
 
@@ -59,35 +60,9 @@ class HexCodeAreaCommandHandler extends DefaultCodeAreaCommandHandler {
      */
     @Override
     public void cut() {
-        byte[] data = Utils.getCodeAreaData(codeArea);
+        byte[] data = FormUtils.getCodeAreaData(codeArea);
         super.cut();
         Utils.copyToClipboard(encodeHex(data));
-    }
-
-    /**
-     * Paste an array of bytes into the CodeArea
-     * @param bytes bytes to paste
-     */
-    private void pasteByteArray(byte[] bytes) {
-        CodeAreaCaret caret = codeArea.getCaret();
-        long dataPosition = caret.getDataPosition();
-        int length = bytes.length;
-        if (this.codeArea.getEditationMode() == EditationMode.OVERWRITE) {
-            long toRemove = length;
-            if (dataPosition + toRemove > this.codeArea.getDataSize()) {
-                toRemove = this.codeArea.getDataSize() - dataPosition;
-            }
-
-            ((EditableBinaryData) this.codeArea.getData()).remove(dataPosition, toRemove);
-        }
-
-        ((EditableBinaryData) this.codeArea.getData()).insert(this.codeArea.getDataPosition(), bytes);
-        this.codeArea.notifyDataChanged();
-        caret.setCaretPosition(caret.getDataPosition() + (long) length);
-        caret.setCodeOffset(0);
-        this.codeArea.updateScrollBars();
-        this.codeArea.notifyCaretMoved();
-        this.codeArea.revealCursor();
     }
 
     /**
@@ -111,5 +86,32 @@ class HexCodeAreaCommandHandler extends DefaultCodeAreaCommandHandler {
         } catch (UnsupportedFlavorException | IOException e) {
             super.paste();
         }
+    }
+
+    /**
+     * Paste an array of bytes into the CodeArea
+     *
+     * @param bytes bytes to paste
+     */
+    private void pasteByteArray(byte[] bytes) {
+        CodeAreaCaret caret = codeArea.getCaret();
+        long dataPosition = caret.getDataPosition();
+        int length = bytes.length;
+        if (this.codeArea.getEditationMode() == EditationMode.OVERWRITE) {
+            long toRemove = length;
+            if (dataPosition + toRemove > this.codeArea.getDataSize()) {
+                toRemove = this.codeArea.getDataSize() - dataPosition;
+            }
+
+            ((EditableBinaryData) this.codeArea.getData()).remove(dataPosition, toRemove);
+        }
+
+        ((EditableBinaryData) this.codeArea.getData()).insert(this.codeArea.getDataPosition(), bytes);
+        this.codeArea.notifyDataChanged();
+        caret.setCaretPosition(caret.getDataPosition() + (long) length);
+        caret.setCodeOffset(0);
+        this.codeArea.updateScrollBars();
+        this.codeArea.notifyCaretMoved();
+        this.codeArea.revealCursor();
     }
 }

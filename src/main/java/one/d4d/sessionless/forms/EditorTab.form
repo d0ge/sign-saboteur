@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="20" y="20" width="500" height="613"/>
+      <xy x="20" y="20" width="500" height="650"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -598,6 +598,92 @@
                     </constraints>
                     <properties/>
                     <border type="line" title-resource-bundle="strings" title-key="ruby_separator_label">
+                      <color color="-7763575"/>
+                    </border>
+                    <children/>
+                  </grid>
+                </children>
+              </grid>
+              <grid id="762a3" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <tabbedpane title-resource-bundle="strings" title-key="jsonwebsignature_tab_label"/>
+                </constraints>
+                <properties/>
+                <border type="empty"/>
+                <children>
+                  <grid id="f4c6b" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="line" title-resource-bundle="strings" title-key="jsonwebsignature_header_label">
+                      <color color="-7763575"/>
+                    </border>
+                    <children>
+                      <scrollpane id="5921" class="org.fife.ui.rtextarea.RTextScrollPane">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties/>
+                        <border type="none"/>
+                        <children>
+                          <component id="28acb" class="org.fife.ui.rsyntaxtextarea.RSyntaxTextArea" binding="textAreaJSONWebSignatureHeader" custom-create="true">
+                            <constraints/>
+                            <properties>
+                              <currentLineHighlightColor color="-1"/>
+                            </properties>
+                          </component>
+                        </children>
+                      </scrollpane>
+                    </children>
+                  </grid>
+                  <grid id="f026e" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="line" title-resource-bundle="strings" title-key="jsonwebsignature_payload_label">
+                      <color color="-7763575"/>
+                    </border>
+                    <children>
+                      <scrollpane id="5e103" class="org.fife.ui.rtextarea.RTextScrollPane">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties/>
+                        <border type="none"/>
+                        <children>
+                          <component id="69288" class="org.fife.ui.rsyntaxtextarea.RSyntaxTextArea" binding="textAreaJSONWebSignaturePayload" custom-create="true">
+                            <constraints/>
+                            <properties>
+                              <currentLineHighlightColor color="-1"/>
+                            </properties>
+                          </component>
+                        </children>
+                      </scrollpane>
+                    </children>
+                  </grid>
+                  <grid id="6267f" binding="panelJSONWebSignature" custom-create="true" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="line" title-resource-bundle="strings" title-key="jsonwebsignature_label">
+                      <color color="-7763575"/>
+                    </border>
+                    <children/>
+                  </grid>
+                  <grid id="4ecfb" binding="panelJSONWebSeparator" custom-create="true" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="line" title-resource-bundle="strings" title-key="jsonwebsignature_separator_label">
                       <color color="-7763575"/>
                     </border>
                     <children/>

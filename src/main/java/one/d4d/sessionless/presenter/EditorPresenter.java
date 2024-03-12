@@ -177,6 +177,21 @@ public class EditorPresenter extends Presenter {
         view.setRubySeparator(token.getSeparator());
     }
 
+    private JSONWebSignature getJSONWebSignature() {
+        String header = Base64.getUrlEncoder().withoutPadding().encodeToString(view.getJWTHeader().getBytes());
+        String payload = Base64.getUrlEncoder().withoutPadding().encodeToString(view.getJWTPayload().getBytes());
+        String signature = Base64.getUrlEncoder().withoutPadding().encodeToString(view.getJWTSignature());
+        byte[] separator = view.getJWTSeparator().length == 0 ? new byte[]{46} : view.getJWTSeparator();
+        return new JSONWebSignature(header, payload, signature, separator);
+    }
+
+    private void setJSONWebSignature(JSONWebSignature token) {
+        view.setJWTHeader(token.getHeader());
+        view.setJWTPayload(token.getPayload());
+        view.setJWTSignature(token.getSignature());
+        view.setJWTSeparator(token.getSeparator());
+    }
+
     private UnknownSignedToken getUnknown() {
         String message = view.getUnknownMessage();
         String signature = view.getUnknownSignature();
@@ -197,11 +212,12 @@ public class EditorPresenter extends Presenter {
 
         SignedToken tokenObject;
         switch (view.getMode()) {
-            case EditorTab.TAB_DANGEROUSE -> tokenObject = getDangerous();
+            case EditorTab.TAB_DANGEROUS -> tokenObject = getDangerous();
             case EditorTab.TAB_EXPRESS -> tokenObject = getExpress();
             case EditorTab.TAB_OAUTH -> tokenObject = getOAuth();
             case EditorTab.TAB_TORNADO -> tokenObject = getTornado();
             case EditorTab.TAB_RUBY -> tokenObject = getRuby();
+            case EditorTab.TAB_JWT -> tokenObject = getJSONWebSignature();
             default -> tokenObject = getUnknown();
         }
         mutableSignedTokenObject.setModified(tokenObject);
@@ -229,6 +245,9 @@ public class EditorPresenter extends Presenter {
         } else if (tokenObject instanceof RubySignedToken) {
             view.setRubyMode();
             setRuby((RubySignedToken) tokenObject);
+        } else if (tokenObject instanceof JSONWebSignature) {
+            view.setJWTMode();
+            setJSONWebSignature((JSONWebSignature) tokenObject);
         } else if (tokenObject instanceof UnknownSignedToken) {
             view.setUnknownMode();
             setUnknown((UnknownSignedToken) tokenObject);
@@ -254,7 +273,7 @@ public class EditorPresenter extends Presenter {
         MutableSignedToken mutableJoseObject = model.getSignedTokenObject(view.getSelectedSignedTokenObjectIndex());
         SignedToken tokenObject = mutableJoseObject.getModified();
 
-        if (keysPresenter.getSigningKeys().size() == 0) {
+        if (keysPresenter.getSigningKeys().isEmpty()) {
             messageDialogFactory.showWarningDialog("error_title_no_signing_keys", "error_no_signing_keys");
             return;
         }
@@ -285,6 +304,9 @@ public class EditorPresenter extends Presenter {
             } else if (signed instanceof RubySignedToken) {
                 view.setRubyMode();
                 setRuby((RubySignedToken) signed);
+            } else if (signed instanceof JSONWebSignature) {
+                view.setJWTMode();
+                setJSONWebSignature((JSONWebSignature) signed);
             } else if (signed instanceof UnknownSignedToken) {
                 view.setUnknownMode();
                 setUnknown((UnknownSignedToken) signed);
@@ -328,6 +350,9 @@ public class EditorPresenter extends Presenter {
             } else if (signed instanceof RubySignedToken) {
                 view.setRubyMode();
                 setRuby((RubySignedToken) signed);
+            } else if (signed instanceof JSONWebSignature) {
+                view.setJWTMode();
+                setJSONWebSignature((JSONWebSignature) signed);
             } else if (signed instanceof UnknownSignedToken) {
                 view.setUnknownMode();
                 setUnknown((UnknownSignedToken) signed);
@@ -344,17 +369,17 @@ public class EditorPresenter extends Presenter {
         Set<String> attackKeys = keysPresenter.getSecrets();
         Set<String> attackSalts = keysPresenter.getSalts();
 
-        if (attackKeys.size() == 0) {
+        if (attackKeys.isEmpty()) {
             messageDialogFactory.showWarningDialog("error_title_no_secrets", "error_no_secrets");
             return;
         }
 
-        if (attackSalts.size() == 0) {
+        if (attackSalts.isEmpty()) {
             messageDialogFactory.showWarningDialog("error_title_no_salts", "error_no_salts");
             return;
         }
 
-        if (keysPresenter.getSigningKeys().size() == 0 && mode == Attack.KNOWN) {
+        if (keysPresenter.getSigningKeys().isEmpty() && mode == Attack.KNOWN) {
             messageDialogFactory.showWarningDialog("error_title_no_signing_keys", "error_no_signing_keys");
             return;
         }

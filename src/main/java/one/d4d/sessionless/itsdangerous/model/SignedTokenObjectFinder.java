@@ -1,10 +1,11 @@
 package one.d4d.sessionless.itsdangerous.model;
 
 import burp.api.montoya.http.message.Cookie;
+import burp.api.montoya.http.message.params.HttpParameterType;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.config.SignerConfig;
-import burp.config.Signers;
 import com.google.common.base.CharMatcher;
+import one.d4d.sessionless.itsdangerous.crypto.Signers;
 import one.d4d.sessionless.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,20 +22,20 @@ public class SignedTokenObjectFinder {
     // Regular expressions for JWS/JWE extraction
     private static final String BASE64_REGEX = "[A-Za-z0-9-_]";
     private static final String SEPARATOR_REGEX = "[.:!#$*;@|~]";
-    private static final String SIGNER_REGEX = String.format("\\.?%s*%s+%s*%s+%s+", BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX);
+    private static final String SIGNER_REGEX = String.format("\\.?%s+%s+%s+%s+%s+", BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX);
     private static final Pattern SIGNER_OBJECT_PATTERN = Pattern.compile(String.format("(%s)", SIGNER_REGEX));
     private static final String UNKNOWN_SIGNED_STRING_REGEXP = String.format("(%s*%s%s{26,86})", BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX);
     private static final Pattern UNKNOWN_SIGNED_STRING_PATTERN = Pattern.compile(UNKNOWN_SIGNED_STRING_REGEXP);
 
     public static boolean containsSignedTokenObjects(SignerConfig signerConfig, String text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         List<MutableSignedToken> candidates = extractSignedTokenObjects(signerConfig, text, cookies, params);
-        return candidates.size() > 0;
+        return !candidates.isEmpty();
     }
 
     public static List<MutableSignedToken> extractSignedTokenObjects(SignerConfig signerConfig, String text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         List<MutableSignedToken> signedTokensObjects = new ArrayList<>();
         Map<String, String> cookiesToHashMap = convertCookiesToHashMap(cookies);
-        Map<String, String> paramsToHashMap = convertParamsToHashMap(params);
+        Map<HttpParameterType, Map<String, String>> paramsToHashMap = convertParamsToHashMap(params);
         if (signerConfig.isEnabled(Signers.DANGEROUS)) {
             Set<String> tokenCandidates = findCandidateSignedTokenObjectsWithin(text);
             for (String candidate : tokenCandidates) {
@@ -45,30 +46,36 @@ public class SignedTokenObjectFinder {
         }
         if (signerConfig.isEnabled(Signers.EXPRESS)) {
             signedTokensObjects.addAll(parseExpressSignedParams(cookiesToHashMap));
-            signedTokensObjects.addAll(parseExpressSignedParams(paramsToHashMap));
+            paramsToHashMap.values().forEach(pairs -> signedTokensObjects.addAll(parseExpressSignedParams(pairs)));
         }
         if (signerConfig.isEnabled(Signers.OAUTH)) {
             cookiesToHashMap.forEach((name, value) -> {
                 parseOauthProxySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
             });
-            paramsToHashMap.forEach((name, value) -> {
-                parseOauthProxySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
+            paramsToHashMap.values().forEach(pairs -> {
+                pairs.forEach((name, value) -> {
+                    parseOauthProxySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
+                });
             });
         }
         if (signerConfig.isEnabled(Signers.TORNADO)) {
             cookiesToHashMap.forEach((name, value) -> {
                 parseTornadoSignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
             });
-            paramsToHashMap.forEach((name, value) -> {
-                parseTornadoSignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
+            paramsToHashMap.values().forEach(pairs -> {
+                pairs.forEach((name, value) -> {
+                    parseTornadoSignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
+                });
             });
         }
         if (signerConfig.isEnabled(Signers.RUBY)) {
             cookiesToHashMap.forEach((name, value) -> {
                 parseRubySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
             });
-            paramsToHashMap.forEach((name, value) -> {
-                parseRubySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
+            paramsToHashMap.values().forEach(pairs -> {
+                pairs.forEach((name, value) -> {
+                    parseRubySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
+                });
             });
         }
         if (signerConfig.isEnabled(Signers.UNKNOWN)) {
@@ -109,7 +116,8 @@ public class SignedTokenObjectFinder {
 
     public static Optional<SignedToken> parseToken(String candidate) {
         Optional<SignedToken> dst = parseDjangoSignedToken(candidate);
-        return dst.isPresent() ? dst : parseDangerousSignedToken(candidate);
+        dst = dst.isPresent() ? dst : parseDangerousSignedToken(candidate);
+        return dst.isPresent() ? dst : parseJSONWebSignature(candidate);
     }
 
     private static List<MutableSignedToken> parseParameters(List<ParsedHttpParameter> params) {
@@ -120,13 +128,13 @@ public class SignedTokenObjectFinder {
         return parseSignedTokenWithinCookies(params);
     }
 
-    private static Map<String, String> convertParamsToHashMap(List<ParsedHttpParameter> params) {
+    private static Map<HttpParameterType, Map<String, String>> convertParamsToHashMap(List<ParsedHttpParameter> params) {
         if (params == null) return new HashMap<>();
-        return params.stream()
-                .collect(Collectors.toMap(
+        return params.stream().collect(Collectors.groupingBy(ParsedHttpParameter::type,
+                Collectors.toMap(
                         ParsedHttpParameter::name,
-                        ParsedHttpParameter::value)
-                );
+                        ParsedHttpParameter::value,
+                        (key1, key2) -> key1)));
     }
 
     private static Map<String, String> convertCookiesToHashMap(List<Cookie> cookies) {
@@ -454,7 +462,7 @@ public class SignedTokenObjectFinder {
         } catch (Exception e) {
             return Optional.empty();
         }
-        SignedToken t = new JSONWebSignature(header, body, signature, new byte[]{(byte) separator});
+        JSONWebSignature t = new JSONWebSignature(header, body, signature, new byte[]{(byte) separator});
 
         return Optional.of(t);
     }

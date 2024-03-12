@@ -1,15 +1,16 @@
 import burp.api.montoya.http.message.Cookie;
+import one.d4d.sessionless.itsdangerous.Attack;
+import one.d4d.sessionless.itsdangerous.BruteForce;
 import one.d4d.sessionless.itsdangerous.crypto.ExpressTokenSigner;
 import one.d4d.sessionless.itsdangerous.model.ExpressSignedToken;
 import one.d4d.sessionless.itsdangerous.model.MutableSignedToken;
 import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
+import one.d4d.sessionless.keys.SecretKey;
 import one.d4d.sessionless.utils.TestCookie;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ExpressSignedCookieTest {
     @Test
@@ -26,15 +27,23 @@ public class ExpressSignedCookieTest {
         cookies.add(payloadCookie);
         cookies.add(signatureCookie);
         Assertions.assertDoesNotThrow(() -> {
-            Optional<ExpressSignedToken> token =
+            Optional<ExpressSignedToken> optionalSignedToken =
                     SignedTokenObjectFinder.parseSignedTokenWithinCookies(cookies)
                             .stream()
                             .map(MutableSignedToken::getModified)
                             .map(ExpressSignedToken.class::cast)
                             .findFirst();
-            if (token.isPresent()) {
-                token.get().setSigner(s);
-                token.get().unsign();
+            if (optionalSignedToken.isPresent()) {
+                ExpressSignedToken token = optionalSignedToken.get();
+                token.setSigner(s);
+                token.unsign();
+                final Set<String> secrets = new HashSet<>(List.of("key1"));
+                final Set<String> salts = new HashSet<>(List.of("salt"));
+                final List<SecretKey> knownKeys = new ArrayList<>();
+
+                BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.Balanced, token);
+                SecretKey sk = bf.parallel();
+                Assertions.assertNotNull(sk);
             } else throw new Exception("Missed cookie");
         });
     }

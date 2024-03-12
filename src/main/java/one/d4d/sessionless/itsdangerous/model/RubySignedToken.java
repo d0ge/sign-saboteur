@@ -1,7 +1,7 @@
 package one.d4d.sessionless.itsdangerous.model;
 
-import burp.config.Signers;
 import one.d4d.sessionless.itsdangerous.crypto.RubyTokenSigner;
+import one.d4d.sessionless.itsdangerous.crypto.Signers;
 import one.d4d.sessionless.utils.HexUtils;
 
 public class RubySignedToken extends UnknownSignedToken {

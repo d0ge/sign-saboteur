@@ -1,11 +1,11 @@
 package one.d4d.sessionless.itsdangerous.model;
 
-import burp.config.Signers;
 import com.nimbusds.jwt.JWTClaimsSet;
 import one.d4d.sessionless.itsdangerous.Algorithms;
 import one.d4d.sessionless.itsdangerous.Derivation;
 import one.d4d.sessionless.itsdangerous.MessageDerivation;
 import one.d4d.sessionless.itsdangerous.MessageDigestAlgorithm;
+import one.d4d.sessionless.itsdangerous.crypto.Signers;
 import one.d4d.sessionless.itsdangerous.crypto.TokenSigner;
 
 public class UnknownSignedToken extends SignedToken {

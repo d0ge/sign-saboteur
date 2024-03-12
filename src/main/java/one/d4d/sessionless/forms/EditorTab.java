@@ -4,6 +4,7 @@ import burp.api.montoya.collaborator.CollaboratorPayloadGenerator;
 import burp.api.montoya.ui.Selection;
 import burp.api.montoya.ui.editor.extension.ExtensionProvidedEditor;
 import burp.config.SignerConfig;
+import one.d4d.sessionless.forms.utils.FormUtils;
 import one.d4d.sessionless.hexcodearea.HexCodeAreaFactory;
 import one.d4d.sessionless.presenter.EditorPresenter;
 import one.d4d.sessionless.presenter.PresenterStore;
@@ -29,12 +30,13 @@ import static org.exbin.deltahex.EditationAllowed.ALLOWED;
 import static org.exbin.deltahex.EditationAllowed.READ_ONLY;
 
 public abstract class EditorTab implements ExtensionProvidedEditor {
-    public static final int TAB_DANGEROUSE = 0;
+    public static final int TAB_DANGEROUS = 0;
     public static final int TAB_EXPRESS = 1;
     public static final int TAB_OAUTH = 2;
     public static final int TAB_TORNADO = 3;
     public static final int TAB_RUBY = 4;
-    public static final int TAB_UNKNOWN = 5;
+    public static final int TAB_JWT = 5;
+    public static final int TAB_UNKNOWN = 6;
     private static final int MAX_JOSE_OBJECT_STRING_LENGTH = 68;
     final EditorPresenter presenter;
     private final RstaFactory rstaFactory;
@@ -75,11 +77,17 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     private JPanel panelRubySeparator;
     private RSyntaxTextArea textAreaRubyMessage;
     private RSyntaxTextArea textAreaRubySignature;
+    private JPanel panelJSONWebSignature;
+    private JPanel panelJSONWebSeparator;
+    private RSyntaxTextArea textAreaJSONWebSignatureHeader;
+    private RSyntaxTextArea textAreaJSONWebSignaturePayload;
     private CodeArea codeAreaDangerousSignature;
     private CodeArea codeAreaDangerousSeparator;
     private CodeArea codeAreaOAuthSignature;
     private CodeArea codeAreaTornadoSignature;
     private CodeArea codeAreaRubySeparator;
+    private CodeArea codeAreaJWTSignature;
+    private CodeArea codeAreaJWTSeparator;
     private CodeArea codeAreaUnknownSeparator;
 
     EditorTab(
@@ -133,6 +141,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         textAreaTornadoValue.getDocument().addDocumentListener(documentListener);
         textAreaRubyMessage.getDocument().addDocumentListener(documentListener);
         textAreaRubySignature.getDocument().addDocumentListener(documentListener);
+        textAreaJSONWebSignatureHeader.getDocument().addDocumentListener(documentListener);
+        textAreaJSONWebSignaturePayload.getDocument().addDocumentListener(documentListener);
         textAreaUnknownStringMessage.getDocument().addDocumentListener(documentListener);
         textAreaUnknownStringSignature.getDocument().addDocumentListener(documentListener);
 
@@ -145,6 +155,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         codeAreaOAuthSignature.addDataChangedListener(presenter::componentChanged);
         codeAreaTornadoSignature.addDataChangedListener(presenter::componentChanged);
         codeAreaRubySeparator.addDataChangedListener(presenter::componentChanged);
+        codeAreaJWTSignature.addDataChangedListener(presenter::componentChanged);
+        codeAreaJWTSeparator.addDataChangedListener(presenter::componentChanged);
         codeAreaUnknownSeparator.addDataChangedListener(presenter::componentChanged);
 
         comboBoxSignedToken.addActionListener(e -> presenter.onSelectionChanged());
@@ -222,7 +234,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     }
 
     public byte[] getOAuthSignature() {
-        return Utils.getCodeAreaData(codeAreaOAuthSignature);
+        return FormUtils.getCodeAreaData(codeAreaOAuthSignature);
     }
 
     public void setOAuthSignature(byte[] signature) {
@@ -254,7 +266,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     }
 
     public byte[] getTornadoSignature() {
-        return Utils.getCodeAreaData(codeAreaTornadoSignature);
+        return FormUtils.getCodeAreaData(codeAreaTornadoSignature);
     }
 
     public void setTornadoSignature(byte[] signature) {
@@ -262,7 +274,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     }
 
     public byte[] getDangerousSignature() {
-        return Utils.getCodeAreaData(codeAreaDangerousSignature);
+        return FormUtils.getCodeAreaData(codeAreaDangerousSignature);
     }
 
     public void setDangerousSignature(byte[] signature) {
@@ -286,7 +298,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     }
 
     public byte[] getDangerousSeparator() {
-        return Utils.getCodeAreaData(codeAreaDangerousSeparator);
+        return FormUtils.getCodeAreaData(codeAreaDangerousSeparator);
     }
 
     public void setDangerousSeparator(byte[] separator) {
@@ -334,11 +346,43 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     }
 
     public byte[] getRubySeparator() {
-        return Utils.getCodeAreaData(codeAreaRubySeparator);
+        return FormUtils.getCodeAreaData(codeAreaRubySeparator);
     }
 
     public void setRubySeparator(byte[] separator) {
         codeAreaRubySeparator.setData(new ByteArrayEditableData(separator));
+    }
+
+    public String getJWTHeader() {
+        return textAreaJSONWebSignatureHeader.getText();
+    }
+
+    public void setJWTHeader(String text) {
+        textAreaJSONWebSignatureHeader.setText(text);
+    }
+
+    public String getJWTPayload() {
+        return textAreaJSONWebSignaturePayload.getText();
+    }
+
+    public void setJWTPayload(String text) {
+        textAreaJSONWebSignaturePayload.setText(text);
+    }
+
+    public byte[] getJWTSignature() {
+        return FormUtils.getCodeAreaData(codeAreaJWTSignature);
+    }
+
+    public void setJWTSignature(byte[] separator) {
+        codeAreaJWTSignature.setData(new ByteArrayEditableData(separator));
+    }
+
+    public byte[] getJWTSeparator() {
+        return FormUtils.getCodeAreaData(codeAreaJWTSeparator);
+    }
+
+    public void setJWTSeparator(byte[] separator) {
+        codeAreaJWTSeparator.setData(new ByteArrayEditableData(separator));
     }
 
     public String getUnknownMessage() {
@@ -358,7 +402,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     }
 
     public byte[] getUnknownSeparator() {
-        return Utils.getCodeAreaData(codeAreaUnknownSeparator);
+        return FormUtils.getCodeAreaData(codeAreaUnknownSeparator);
     }
 
     public void setUnknownSeparator(byte[] separator) {
@@ -391,10 +435,17 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         codeAreaTornadoSignature = hexCodeAreaFactory.build();
         panelTornadoSignature.add(codeAreaTornadoSignature);
 
-
         panelRubySeparator = new JPanel(new BorderLayout());
         codeAreaRubySeparator = hexCodeAreaFactory.build();
         panelRubySeparator.add(codeAreaRubySeparator);
+
+        panelJSONWebSignature = new JPanel(new BorderLayout());
+        codeAreaJWTSignature = hexCodeAreaFactory.build();
+        panelJSONWebSignature.add(codeAreaJWTSignature);
+
+        panelJSONWebSeparator = new JPanel(new BorderLayout());
+        codeAreaJWTSeparator = hexCodeAreaFactory.build();
+        panelJSONWebSeparator.add(codeAreaJWTSeparator);
 
         panelUnknownStringSeparator = new JPanel(new BorderLayout());
         codeAreaUnknownSeparator = hexCodeAreaFactory.build();
@@ -441,6 +492,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         textAreaTornadoValue = rstaFactory.buildDefaultTextArea();
         textAreaRubyMessage = rstaFactory.buildDefaultTextArea();
         textAreaRubySignature = rstaFactory.buildDefaultTextArea();
+        textAreaJSONWebSignatureHeader = rstaFactory.buildDefaultTextArea();
+        textAreaJSONWebSignaturePayload = rstaFactory.buildDefaultTextArea();
         textAreaUnknownStringMessage = rstaFactory.buildDefaultTextArea();
         textAreaUnknownStringSignature = rstaFactory.buildDefaultTextArea();
     }
@@ -466,8 +519,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     }
 
     public void setDangerousMode() {
-        mode = TAB_DANGEROUSE;
-        enableTabAtIndex(TAB_DANGEROUSE);
+        mode = TAB_DANGEROUS;
+        enableTabAtIndex(TAB_DANGEROUS);
         buttonBruteForceAttack.setEnabled(editable);
         buttonAttack.setEnabled(editable);
         textAreaDangerousPayload.setEditable(editable);
@@ -534,6 +587,20 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
 
         EditationAllowed editationAllowed = editable ? ALLOWED : READ_ONLY;
         codeAreaRubySeparator.setEditationAllowed(editationAllowed);
+    }
+
+    public void setJWTMode() {
+        mode = TAB_JWT;
+        enableTabAtIndex(TAB_JWT);
+        buttonBruteForceAttack.setEnabled(editable);
+        buttonAttack.setEnabled(editable);
+
+        textAreaJSONWebSignatureHeader.setEditable(editable);
+        textAreaJSONWebSignaturePayload.setEditable(editable);
+
+        EditationAllowed editationAllowed = editable ? ALLOWED : READ_ONLY;
+        codeAreaJWTSignature.setEditationAllowed(editationAllowed);
+        codeAreaJWTSeparator.setEditationAllowed(editationAllowed);
     }
 
     public void setUnknownMode() {

@@ -10,7 +10,7 @@ import one.d4d.sessionless.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -19,6 +19,7 @@ import java.util.List;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 
 public class AttackDialog extends AbstractDialog {
+    private final URL targetURL;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -32,13 +33,13 @@ public class AttackDialog extends AbstractDialog {
     private JComboBox comboBoxSigningKey;
     private JCheckBox checkBoxUserAccessToken;
     private SignedToken tokenObject;
-    private final URL targetURL;
+
     public AttackDialog(
-    Window parent,
-    ErrorLoggingActionListenerFactory actionListenerFactory,
-    List<SecretKey> signingKeys,
-    URL targetURL,
-    SignedToken tokenObject) {
+            Window parent,
+            ErrorLoggingActionListenerFactory actionListenerFactory,
+            List<SecretKey> signingKeys,
+            URL targetURL,
+            SignedToken tokenObject) {
         super(parent, "sign_dialog_title");
         this.tokenObject = tokenObject;
         this.targetURL = targetURL;
@@ -63,9 +64,9 @@ public class AttackDialog extends AbstractDialog {
 
     }
 
-    private JWTClaimsSet checkInput( SecretKey selectedKey) {
+    private JWTClaimsSet checkInput(SecretKey selectedKey) {
         List<JWTClaimsSet> args = new ArrayList<>();
-        if (checkBoxUserClaims.isSelected()){
+        if (checkBoxUserClaims.isSelected()) {
             args.add(ClaimsUtils.generateUserClaim(targetURL));
         }
         if (checkBoxUserWrappedClaims.isSelected()) {
@@ -87,7 +88,7 @@ public class AttackDialog extends AbstractDialog {
             args.add(ClaimsUtils.generateAuthenticatedClaims());
         }
         if (checkBoxUserAccessToken.isSelected()) {
-            args.add(ClaimsUtils.generateUserAccessTokenPayload(targetURL,selectedKey));
+            args.add(ClaimsUtils.generateUserAccessTokenPayload(targetURL, selectedKey));
         }
         try {
             return ClaimsUtils.concatClaims(args);
@@ -118,6 +119,8 @@ public class AttackDialog extends AbstractDialog {
                 s = new OauthProxyTokenSigner(selectedKey);
             } else if (tokenObject instanceof TornadoSignedToken) {
                 s = new TornadoTokenSigner(selectedKey);
+            } else if (tokenObject instanceof JSONWebSignature) {
+                s = new JSONWebSignatureTokenSigner(selectedKey);
             } else if (tokenObject instanceof UnknownSignedToken) {
                 s = new TokenSigner(selectedKey);
             } else {

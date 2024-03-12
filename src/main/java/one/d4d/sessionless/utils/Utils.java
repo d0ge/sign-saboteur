@@ -1,13 +1,10 @@
 package one.d4d.sessionless.utils;
 
-import burp.api.montoya.http.message.MimeType;
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.StringUtils;
-import org.exbin.deltahex.swing.CodeArea;
-import org.exbin.utils.binary_data.BinaryData;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -27,7 +24,6 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class Utils {
-    public static final Set<MimeType> SUPPORTED_MIMETYPES = Set.of(MimeType.HTML, MimeType.PLAIN_TEXT, MimeType.JSON, MimeType.XML, MimeType.YAML);
     public static final int BRUTE_FORCE_CHUNK_SIZE = 4096;
     public static final int WORDLIST_ONE_CHAR = 256;
     public static final int WORDLIST_TWO_CHAR = 65536;
@@ -383,13 +379,6 @@ public class Utils {
         return stringBuilder.toString();
     }
 
-    public static byte[] getCodeAreaData(CodeArea codeArea) {
-        BinaryData binaryData = codeArea.getData();
-        int size = (int) binaryData.getDataSize();
-        byte[] data = new byte[size];
-        binaryData.copyToArray(0L, data, 0, size);
-        return data;
-    }
 
     public static Set<String> deserializeFile(File f) {
         Set<String> result = new HashSet<>();
