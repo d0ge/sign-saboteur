@@ -1,5 +1,6 @@
 package one.d4d.sessionless.itsdangerous.model;
 
+import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.HttpParameterType;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
@@ -9,6 +10,7 @@ import one.d4d.sessionless.itsdangerous.crypto.Signers;
 import one.d4d.sessionless.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,28 +22,22 @@ public class SignedTokenObjectFinder {
     private static final int[] SIGNATURES_LENGTH = {20, 28, 32, 48, 64};
     private static final String SIGNED_PARAM = ".SIG";
     // Regular expressions for JWS/JWE extraction
-    private static final String BASE64_REGEX = "[A-Za-z0-9-_]";
-    private static final String SEPARATOR_REGEX = "[.:!#$*;@|~]";
-    private static final String SIGNER_REGEX = String.format("\\.?%s+%s+%s+%s+%s+", BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX);
-    private static final Pattern SIGNER_OBJECT_PATTERN = Pattern.compile(String.format("(%s)", SIGNER_REGEX));
-    private static final String UNKNOWN_SIGNED_STRING_REGEXP = String.format("(%s*%s%s{26,86})", BASE64_REGEX, SEPARATOR_REGEX, BASE64_REGEX);
-    private static final Pattern UNKNOWN_SIGNED_STRING_PATTERN = Pattern.compile(UNKNOWN_SIGNED_STRING_REGEXP);
 
-    public static boolean containsSignedTokenObjects(SignerConfig signerConfig, String text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
+    public static boolean containsSignedTokenObjects(SignerConfig signerConfig, ByteArray text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         List<MutableSignedToken> candidates = extractSignedTokenObjects(signerConfig, text, cookies, params);
         return !candidates.isEmpty();
     }
 
-    public static List<MutableSignedToken> extractSignedTokenObjects(SignerConfig signerConfig, String text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
+    public static List<MutableSignedToken> extractSignedTokenObjects(SignerConfig signerConfig, ByteArray text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         List<MutableSignedToken> signedTokensObjects = new ArrayList<>();
         Map<String, String> cookiesToHashMap = convertCookiesToHashMap(cookies);
         Map<HttpParameterType, Map<String, String>> paramsToHashMap = convertParamsToHashMap(params);
         if (signerConfig.isEnabled(Signers.DANGEROUS)) {
-            Set<String> tokenCandidates = findCandidateSignedTokenObjectsWithin(text);
-            for (String candidate : tokenCandidates) {
-                parseToken(candidate)
+            List<ByteArray> tokenCandidates = Utils.searchByteArrayBase64URLSafe(text);
+            for (ByteArray candidate : tokenCandidates) {
+                parseToken(candidate.toString())
                         .ifPresent(value ->
-                                signedTokensObjects.add(new MutableSignedToken(candidate, value)));
+                                signedTokensObjects.add(new MutableSignedToken(candidate.toString(), value)));
             }
         }
         if (signerConfig.isEnabled(Signers.EXPRESS)) {
@@ -79,39 +75,32 @@ public class SignedTokenObjectFinder {
             });
         }
         if (signerConfig.isEnabled(Signers.UNKNOWN)) {
-            Set<String> stringCandidates = findCandidateUnknownSignedStringWithin(text);
-            for (String candidate : stringCandidates) {
-                parseUnknownSignedString(candidate)
+            List<ByteArray> stringCandidates  = Utils.searchByteArrayBase64(text);
+            for (ByteArray candidate : stringCandidates) {
+                parseUnknownSignedString(candidate.toString())
                         .ifPresent(value ->
-                                signedTokensObjects.add(new MutableSignedToken(candidate, value)));
+                                signedTokensObjects.add(new MutableSignedToken(candidate.toString(), value)));
             }
         }
 
         return signedTokensObjects;
     }
-
-    public static Set<String> findCandidateSignedTokenObjectsWithin(String text) {
-        Matcher m = SIGNER_OBJECT_PATTERN.matcher(text);
-        Set<String> strings = new HashSet<>();
-
-        while (m.find()) {
-            String token = m.group();
-            strings.add(token);
-        }
-
-        return strings;
+    private static Map<HttpParameterType, Map<String, String>> convertParamsToHashMap(List<ParsedHttpParameter> params) {
+        if (params == null) return new HashMap<>();
+        return params.stream().collect(Collectors.groupingBy(ParsedHttpParameter::type,
+                Collectors.toMap(
+                        ParsedHttpParameter::name,
+                        ParsedHttpParameter::value,
+                        (key1, key2) -> key1)));
     }
 
-    public static Set<String> findCandidateUnknownSignedStringWithin(String text) {
-        Matcher m = UNKNOWN_SIGNED_STRING_PATTERN.matcher(text);
-        Set<String> strings = new HashSet<>();
-
-        while (m.find()) {
-            String token = m.group();
-            strings.add(token);
-        }
-
-        return strings;
+    private static Map<String, String> convertCookiesToHashMap(List<Cookie> cookies) {
+        if (cookies == null) return new HashMap<>();
+        return cookies.stream()
+                .collect(Collectors.toMap(
+                        Cookie::name,
+                        Cookie::value,
+                        (key1, key2) -> key1));
     }
 
     public static Optional<SignedToken> parseToken(String candidate) {
@@ -128,23 +117,6 @@ public class SignedTokenObjectFinder {
         return parseSignedTokenWithinCookies(params);
     }
 
-    private static Map<HttpParameterType, Map<String, String>> convertParamsToHashMap(List<ParsedHttpParameter> params) {
-        if (params == null) return new HashMap<>();
-        return params.stream().collect(Collectors.groupingBy(ParsedHttpParameter::type,
-                Collectors.toMap(
-                        ParsedHttpParameter::name,
-                        ParsedHttpParameter::value,
-                        (key1, key2) -> key1)));
-    }
-
-    private static Map<String, String> convertCookiesToHashMap(List<Cookie> cookies) {
-        if (cookies == null) return new HashMap<>();
-        return cookies.stream()
-                .collect(Collectors.toMap(
-                        Cookie::name,
-                        Cookie::value)
-                );
-    }
 
     public static List<MutableSignedToken> parseExpressSignedParams(Map<String, String> params) {
         List<MutableSignedToken> signedTokensObjects = new ArrayList<>();
@@ -282,7 +254,13 @@ public class SignedTokenObjectFinder {
             String signature = parts[2];
             try {
                 Base64.getUrlDecoder().decode(payload);
-                Base64.getUrlDecoder().decode(signature);
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+            try {
+                byte[] sign = Utils.normalization(signature.getBytes());
+                if (sign == null) return Optional.empty();
+                if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == sign.length)) return Optional.empty();
             } catch (Exception e) {
                 return Optional.empty();
             }
@@ -375,8 +353,9 @@ public class SignedTokenObjectFinder {
         // Signature guesser
         String signature = parts[2];
         try {
-            int length = Utils.normalization(signature.getBytes()).length;
-            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+            byte[] sign = Utils.normalization(signature.getBytes());
+            if (sign == null) return Optional.empty();
+            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == sign.length)) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -414,8 +393,9 @@ public class SignedTokenObjectFinder {
         // Signature guesser
         String signature = parts[2];
         try {
-            int length = Utils.normalization(signature.getBytes()).length;
-            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+            byte[] sign = Utils.normalization(signature.getBytes());
+            if (sign == null) return Optional.empty();
+            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == sign.length)) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -479,8 +459,9 @@ public class SignedTokenObjectFinder {
         String message = text.substring(0, index);
         String signature = text.substring(index + 1);
         try {
-            int length = Utils.normalization(signature.getBytes()).length;
-            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+            byte[] sign = Utils.normalization(signature.getBytes());
+            if (sign == null) return Optional.empty();
+            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == sign.length)) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -497,8 +478,9 @@ public class SignedTokenObjectFinder {
             String signature = parts[1];
             try {
                 Base64.getUrlDecoder().decode(payload);
-                int length = Utils.normalization(signature.getBytes()).length;
-                if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+                byte[] sign = Utils.normalization(signature.getBytes());
+                if (sign == null) return Optional.empty();
+                if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == sign.length)) return Optional.empty();
             } catch (Exception e) {
                 return Optional.empty();
             }

@@ -1,5 +1,6 @@
 package one.d4d.sessionless.presenter;
 
+import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.config.SignerConfig;
@@ -23,9 +24,9 @@ class EditorModel {
         this.signerConfig = signerConfig;
     }
 
-    void setMessage(String content, List<Cookie> cookies, List<ParsedHttpParameter> params) {
+    void setMessage(ByteArray content, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         synchronized (lock) {
-            message = content;
+            message = content.toString();
             mutableSerializedObjects.clear();
             mutableSerializedObjects.addAll(SignedTokenObjectFinder.extractSignedTokenObjects(signerConfig, content, cookies, params));
         }

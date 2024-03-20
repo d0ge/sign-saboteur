@@ -1,5 +1,9 @@
+import burp.api.montoya.core.ByteArray;
 import one.d4d.sessionless.utils.Utils;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.fail;

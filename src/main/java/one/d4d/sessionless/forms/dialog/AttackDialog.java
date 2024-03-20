@@ -1,5 +1,7 @@
 package one.d4d.sessionless.forms.dialog;
 
+import burp.api.montoya.collaborator.CollaboratorPayload;
+import burp.api.montoya.collaborator.CollaboratorPayloadGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import one.d4d.sessionless.itsdangerous.crypto.*;
 import one.d4d.sessionless.itsdangerous.model.*;
@@ -20,6 +22,7 @@ import static javax.swing.JOptionPane.WARNING_MESSAGE;
 
 public class AttackDialog extends AbstractDialog {
     private final URL targetURL;
+    private final CollaboratorPayloadGenerator collaboratorPayloadGenerator;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -39,9 +42,11 @@ public class AttackDialog extends AbstractDialog {
             ErrorLoggingActionListenerFactory actionListenerFactory,
             List<SecretKey> signingKeys,
             URL targetURL,
+            CollaboratorPayloadGenerator collaboratorPayloadGenerator,
             SignedToken tokenObject) {
         super(parent, "sign_dialog_title");
         this.tokenObject = tokenObject;
+        this.collaboratorPayloadGenerator = collaboratorPayloadGenerator;
         this.targetURL = targetURL;
 
         setContentPane(contentPane);
@@ -65,9 +70,10 @@ public class AttackDialog extends AbstractDialog {
     }
 
     private JWTClaimsSet checkInput(SecretKey selectedKey) {
+        String payload = String.format("https://%s/", collaboratorPayloadGenerator.generatePayload().toString());
         List<JWTClaimsSet> args = new ArrayList<>();
         if (checkBoxUserClaims.isSelected()) {
-            args.add(ClaimsUtils.generateUserClaim(targetURL));
+            args.add(ClaimsUtils.generateUserClaim(targetURL, payload));
         }
         if (checkBoxUserWrappedClaims.isSelected()) {
             args.add(ClaimsUtils.generateUserPayload(targetURL));

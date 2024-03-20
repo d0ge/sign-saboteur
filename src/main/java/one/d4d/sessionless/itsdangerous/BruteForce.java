@@ -84,7 +84,7 @@ public class BruteForce {
         for (TokenSigner s : attacks) {
             try {
                 s.fast_unsign(message, signature);
-                return s.getKey();
+                return s.getKey(token.serialize());
             } catch (BadSignatureException ignored) {
             }
         }
@@ -107,7 +107,7 @@ public class BruteForce {
                         for (TokenSigner s : partition) {
                             try {
                                 s.fast_unsign(message, signature);
-                                return s.getKey();
+                                return s.getKey(token.serialize());
                             } catch (BadSignatureException ignored) {
                             }
                         }

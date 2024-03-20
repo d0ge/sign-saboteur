@@ -1,6 +1,7 @@
 package one.d4d.sessionless.forms;
 
 import burp.api.montoya.collaborator.CollaboratorPayloadGenerator;
+import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.http.HttpService;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
@@ -54,12 +55,12 @@ public class RequestEditorView extends EditorTab implements ExtensionProvidedHtt
             targetURL = null;
         }
         httpService = httpRequest.httpService();
-        presenter.setMessage(httpRequest.toByteArray().toString(), targetURL, null, httpRequest.parameters());
+        presenter.setMessage(httpRequest.toByteArray(), targetURL, null, httpRequest.parameters());
     }
 
     @Override
     public boolean isEnabledFor(HttpRequestResponse requestResponse) {
-        String content = requestResponse.request().toByteArray().toString();
+        ByteArray content = requestResponse.request().toByteArray();
         return presenter.isEnabled(content, null, requestResponse.request().parameters());
     }
 

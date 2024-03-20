@@ -21,10 +21,13 @@ public class ClaimsUtils {
     private static final long EXPIRE_TIME = 1000 * 60 * 60 * 24;
 
     public static JWTClaimsSet generateUserClaim(URL target) {
-        return generateUserClaim(target, DEFAULT_USERNAME);
+        return generateUserClaim(target, DEFAULT_USERNAME, DEFAULT_COLLABORATOR_URL);
+    }
+    public static JWTClaimsSet generateUserClaim(URL target, String collaborator) {
+        return generateUserClaim(target, DEFAULT_USERNAME, collaborator);
     }
 
-    public static JWTClaimsSet generateUserClaim(URL target, String username) {
+    public static JWTClaimsSet generateUserClaim(URL target, String username, String collaborator) {
         final long currentTimeMillis = System.currentTimeMillis();
         String host = target.getHost().equals("") ? "localhost" : target.getHost();
 
@@ -44,7 +47,9 @@ public class ClaimsUtils {
                 .claim("preferred_username", String.format("%s@%s", username, host))
                 .claim("email", String.format("%s@%s", username, host))
                 .claim("email_verified", true)
-                .claim("picture", DEFAULT_COLLABORATOR_URL)
+                .claim("profile", collaborator)
+                .claim("picture", collaborator)
+                .claim("website", collaborator)
                 .build();
     }
 

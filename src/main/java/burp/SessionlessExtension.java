@@ -4,11 +4,13 @@ import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.persistence.Preferences;
 import burp.api.montoya.proxy.Proxy;
+import burp.api.montoya.scanner.Scanner;
 import burp.api.montoya.ui.UserInterface;
 import burp.api.montoya.utilities.ByteUtils;
 import burp.config.*;
 import burp.proxy.ProxyHttpMessageHandler;
 import burp.proxy.ProxyWsMessageHandler;
+import burp.scanner.ScannerHandler;
 import one.d4d.sessionless.forms.ExtensionTab;
 import one.d4d.sessionless.forms.RequestEditorView;
 import one.d4d.sessionless.forms.ResponseEditorView;
@@ -40,6 +42,7 @@ public class SessionlessExtension implements BurpExtension {
         Window suiteWindow = userInterface.swingUtils().suiteFrame();
 
         Proxy proxy = api.proxy();
+        Scanner scanner = api.scanner();
         ProxyConfig proxyConfig = burpConfig.proxyConfig();
         SignerConfig signerConfig = burpConfig.signerConfig();
         ByteUtils byteUtils = api.utilities().byteUtils();
@@ -93,5 +96,7 @@ public class SessionlessExtension implements BurpExtension {
                 proxyWebSocketCreation.proxyWebSocket().registerProxyMessageHandler(proxyWsMessageHandler)
         );
 
+        ScannerHandler scannerHandler = new ScannerHandler(presenters, signerConfig);
+        scanner.registerScanCheck(scannerHandler);
     }
 }

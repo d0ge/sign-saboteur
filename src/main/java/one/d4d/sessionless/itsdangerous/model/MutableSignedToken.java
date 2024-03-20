@@ -9,6 +9,10 @@ public class MutableSignedToken {
         this.modified = modified;
     }
 
+    public boolean cracked() {
+        return modified.getKey() != null;
+    }
+
     public boolean changed() {
         return !original.equals(modified.serialize());
     }

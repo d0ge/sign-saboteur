@@ -1,5 +1,6 @@
 package burp.proxy;
 
+import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.proxy.websocket.*;
 import burp.api.montoya.utilities.ByteUtils;
 import burp.config.ProxyConfig;
@@ -16,7 +17,7 @@ public class ProxyWsMessageHandler implements ProxyMessageHandler {
     public TextMessageReceivedAction handleTextMessageReceived(InterceptedTextMessage interceptedTextMessage) {
         annotationsModifier.updateAnnotationsIfApplicable(
                 interceptedTextMessage.annotations(),
-                interceptedTextMessage.payload(),
+                ByteArray.byteArray(interceptedTextMessage.payload()),
                 null,
                 null);
 

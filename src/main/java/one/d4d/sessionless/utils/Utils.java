@@ -1,16 +1,24 @@
 package one.d4d.sessionless.utils;
 
+import burp.api.montoya.core.ByteArray;
+import com.google.common.collect.Sets;
+import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -32,7 +40,46 @@ public class Utils {
     private static final String BASE64_REGEX = "[A-Za-z0-9-_]";
     private static final Pattern HEX_PATTERN = Pattern.compile("^([0-9a-fA-F]{2})+$");
     private static final Pattern BASE64_PATTERN = Pattern.compile(String.format("^%s+$", BASE64_REGEX));
+    static Set<Integer> BASE64_URL_SET = Set.of(45, 95, 65, 97, 66, 98, 67, 99, 68, 100, 69, 101, 70, 102, 71, 103, 72, 104, 73, 105, 74, 106, 75, 107, 76, 108, 77, 109, 78, 110, 79, 111, 80, 112, 81, 113, 82, 114, 83, 115, 84, 116, 85, 117, 86, 118, 87, 119, 88, 120, 89, 121, 90, 122, 48,49,50,51,52,53,54,55,56,57);
+    static Set<Integer> BASE64_SET = Set.of(37, 43, 47, 45, 95, 65, 97, 66, 98, 67, 99, 68, 100, 69, 101, 70, 102, 71, 103, 72, 104, 73, 105, 74, 106, 75, 107, 76, 108, 77, 109, 78, 110, 79, 111, 80, 112, 81, 113, 82, 114, 83, 115, 84, 116, 85, 117, 86, 118, 87, 119, 88, 120, 89, 121, 90, 122, 48,49,50,51,52,53,54,55,56,57);
+    static Set<Integer> SEPARATORS_SET = Set.of(46, 58, 35, 124); // . : # |
 
+    private static List<ByteArray> searchByteArray(ByteArray data, Set<Integer> alphabet, int size) {
+        int length = 0;
+        List<ByteArray> ret = new ArrayList<>();
+        for (int i = 0; i < data.length(); i++) {
+            if(alphabet.contains((int) data.getByte(i))) {
+                length++;
+                if ( length > size && i == data.length() - 1) {
+                    ret.add(data.subArray(i - length, i));
+                }
+            } else {
+                if ( length > size) {
+                    ret.add(data.subArray(i - length, i));
+                }
+                length = 0;
+            }
+        }
+        return ret;
+    }
+    public static List<ByteArray> searchByteArrayBase64URLSafe(ByteArray data) {
+        return searchByteArray(data, Sets.union(BASE64_URL_SET, SEPARATORS_SET) , 28);
+    }
+
+    public static List<ByteArray> searchByteArrayBase64(ByteArray data) {
+        return searchByteArray(data, Sets.union(BASE64_SET, SEPARATORS_SET) , 28);
+    }
+
+    public static String getSignedTokenIDWithHash(String token)  {
+        try {
+            MessageDigest msdDigest = MessageDigest.getInstance("SHA-1");
+            msdDigest.update(token.getBytes(StandardCharsets.UTF_8));
+            return HexUtils.encodeHex(msdDigest.digest());
+        }catch (NoSuchAlgorithmException e) {
+            return token;
+        }
+
+    }
 
     public static String compressBase64(byte[] value) {
         Deflater compressor = new Deflater();
@@ -77,9 +124,20 @@ public class Utils {
     public static byte[] normalization(byte[] signature) {
         try {
             return hexdigest2byte(new String(signature));
-        } catch (NumberFormatException iae) {
-            return Base64.getUrlDecoder().decode(signature);
+        } catch (NumberFormatException ignored) {
+            // Not a Hex encoded string
         }
+        try {
+            return Base64.getUrlDecoder().decode(signature);
+        }catch (IllegalArgumentException ignored) {
+            // Not a Base64 URL encoded string
+        }
+        try {
+            return Base64.getDecoder().decode(signature);
+        }catch (IllegalArgumentException ignored){
+            // Not a Base64 encoded string
+        }
+        return null;
     }
 
     public static byte[][] split(byte[] data, byte sep) {

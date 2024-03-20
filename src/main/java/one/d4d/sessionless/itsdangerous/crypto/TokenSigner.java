@@ -295,7 +295,16 @@ public class TokenSigner implements Cloneable {
         throw new BadSignatureException("Signature didn't match");
     }
 
-
+    public SecretKey getKey(String hash) {
+        return new SecretKey(
+                Utils.getSignedTokenIDWithHash(hash),
+                new String(secret_key),
+                new String(salt),
+                new String(sep),
+                digestMethod,
+                keyDerivation,
+                messageDerivation, messageDigestAlgorithm);
+    }
     public SecretKey getKey() {
         return new SecretKey(
                 UUID.randomUUID().toString(),

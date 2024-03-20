@@ -2,12 +2,13 @@ package one.d4d.sessionless.itsdangerous.model;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import one.d4d.sessionless.itsdangerous.crypto.TokenSigner;
+import one.d4d.sessionless.keys.SecretKey;
 
 public abstract class SignedToken {
     public String message;
     public String signature;
     public TokenSigner signer;
-
+    private SecretKey key;
 
     public SignedToken(String message) {
         this.message = message;
@@ -19,6 +20,14 @@ public abstract class SignedToken {
 
     public void setSigner(TokenSigner signer) {
         this.signer = signer;
+    }
+
+    public SecretKey getKey() {
+        return key;
+    }
+
+    public void setKey(SecretKey key) {
+        this.key = key;
     }
 
     public String getEncodedMessage() {

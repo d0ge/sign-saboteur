@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.0.8] - 2024-03-20
+
+### Added
+
+- Burp Suite Pro active scan supported now. All identified signed string are scanned for known secrets with Fast algorithm
+
+### Changed
+
+- Regex token search method was removed due to poor performance. New search algorithm was introduced instead.
+
 ## [0.0.7] - 2024-03-12
 
 ### Added

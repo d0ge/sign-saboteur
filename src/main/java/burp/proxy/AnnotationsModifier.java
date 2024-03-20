@@ -22,16 +22,11 @@ class AnnotationsModifier {
         this.signerConfig = signerConfig;
     }
 
-    void updateAnnotationsIfApplicable(Annotations annotations, ByteArray data, List<Cookie> cookies, List<ParsedHttpParameter> params) {
-        String message = byteUtils.convertToString(data.getBytes());
-        updateAnnotationsIfApplicable(annotations, message, cookies, params);
-    }
-
-    void updateAnnotationsIfApplicable(Annotations annotations, String message, List<Cookie> cookies, List<ParsedHttpParameter> params) {
+    void updateAnnotationsIfApplicable(Annotations annotations, ByteArray message, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         updateAnnotations(annotations, message, cookies, params);
     }
 
-    private void updateAnnotations(Annotations annotations, String messageString, List<Cookie> cookies, List<ParsedHttpParameter> params) {
+    private void updateAnnotations(Annotations annotations, ByteArray messageString, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         Counts counts = countExtractedSignedTokenObjects(messageString, cookies, params);
 
         if (!counts.isZero()) {
@@ -40,7 +35,7 @@ class AnnotationsModifier {
         }
     }
 
-    private Counts countExtractedSignedTokenObjects(String messageString, List<Cookie> cookies, List<ParsedHttpParameter> params) {
+    private Counts countExtractedSignedTokenObjects(ByteArray messageString, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         int count = SignedTokenObjectFinder.extractSignedTokenObjects(signerConfig, messageString, cookies, params).size();
 
         return new Counts(proxyConfig, count);

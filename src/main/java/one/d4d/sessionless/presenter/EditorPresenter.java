@@ -1,6 +1,7 @@
 package one.d4d.sessionless.presenter;
 
 import burp.api.montoya.collaborator.CollaboratorPayloadGenerator;
+import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.config.SignerConfig;
@@ -48,7 +49,7 @@ public class EditorPresenter extends Presenter {
         this.signerConfig = signerConfig;
     }
 
-    public void setMessage(String content, URL targetURL, List<Cookie> cookies, List<ParsedHttpParameter> params) {
+    public void setMessage(ByteArray content, URL targetURL, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         this.targetURL = targetURL;
         model.setMessage(content, cookies, params);
         view.setSignedTokenObjects(model.getSerializedObjectStrings());
@@ -283,6 +284,7 @@ public class EditorPresenter extends Presenter {
                 actionListenerFactory,
                 keysPresenter.getSigningKeys(),
                 targetURL,
+                collaboratorPayloadGenerator,
                 tokenObject
         );
         signDialog.display();
@@ -424,7 +426,7 @@ public class EditorPresenter extends Presenter {
         onAttackClicked(Attack.Deep);
     }
 
-    public boolean isEnabled(String text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
+    public boolean isEnabled(ByteArray text, List<Cookie> cookies, List<ParsedHttpParameter> params) {
         return containsSignedTokenObjects(signerConfig, text, cookies, params);
     }
 

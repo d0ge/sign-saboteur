@@ -1,6 +1,7 @@
 package one.d4d.sessionless.forms;
 
 import burp.api.montoya.collaborator.CollaboratorPayloadGenerator;
+import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.MimeType;
 import burp.api.montoya.http.message.responses.HttpResponse;
@@ -14,6 +15,7 @@ import one.d4d.sessionless.rsta.RstaFactory;
 import one.d4d.sessionless.utils.ErrorLoggingActionListenerFactory;
 
 import java.net.URL;
+import java.util.Set;
 
 import static burp.api.montoya.internal.ObjectFactoryLocator.FACTORY;
 
@@ -52,15 +54,28 @@ public class ResponseEditorView extends EditorTab implements ExtensionProvidedHt
         } catch (Exception e) {
             targetURL = null;
         }
-        presenter.setMessage(httpResponse.toByteArray().toString(), targetURL, httpResponse.cookies(), null);
+        presenter.setMessage(httpResponse.toByteArray(), targetURL, httpResponse.cookies(), null);
     }
 
     @Override
     public boolean isEnabledFor(HttpRequestResponse requestResponse) {
+        Set<MimeType> disabled = Set.of(
+                MimeType.IMAGE_UNKNOWN,
+                MimeType.IMAGE_BMP,
+                MimeType.IMAGE_GIF,
+                MimeType.IMAGE_JPEG,
+                MimeType.IMAGE_PNG,
+                MimeType.IMAGE_SVG_XML,
+                MimeType.IMAGE_TIFF,
+                MimeType.SCRIPT,
+                MimeType.CSS,
+                MimeType.SOUND,
+                MimeType.VIDEO
+                );
+        ByteArray content = ByteArray.byteArray("");
         MimeType type = requestResponse.response().statedMimeType();
-        String content = "";
-        if (type == MimeType.HTML || type == MimeType.JSON || type == MimeType.PLAIN_TEXT) {
-            content = requestResponse.response().toByteArray().toString();
+        if (!disabled.contains(type)) {
+            content = requestResponse.response().toByteArray();
         }
         return presenter.isEnabled(content, requestResponse.response().cookies(), null);
     }
