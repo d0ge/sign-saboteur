@@ -4,7 +4,7 @@ plugins {
 
 group = 'one.d4d'
 version = '1.0.0'
-description = 'token-signer'
+description = 'sign-saboteur'
 
 repositories {
     mavenLocal()
