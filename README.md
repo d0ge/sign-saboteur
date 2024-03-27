@@ -1,4 +1,4 @@
-# Sessionless
+# SignSaboteur
 
 SignSaboteur is a Burp Suite extension for editing, signing, verifying, and attacking signed tokens. 
 It supports different types of tokens: [Django TimestampSigner](https://docs.djangoproject.com/en/5.0/topics/signing/#verifying-timestamped-values), [ItsDangerous Signer](https://itsdangerous.palletsprojects.com/en/2.1.x/signer/), [Express cookie-session middleware](https://expressjs.com/en/resources/middleware/cookie-session.html), [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy), [Tornado’s signed cookies](https://www.tornadoweb.org/en/stable/guide/security.html), [Ruby Rails Signed cookies](https://api.rubyonrails.org/classes/ActiveSupport/MessageVerifier.html)
