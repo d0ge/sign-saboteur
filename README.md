@@ -46,7 +46,7 @@ brute force attacks. It supports different message derivation technics, includin
 * _CONCAT_ separator byte will be removed from the message and that new value will be used to calculate signature
 * _Tornado_ separator byte will be added to the end of the message string
 
-<img src="gitimg/unknown_tab.png" width="400"/>
+<img src="gitimg/unknown_tab.png" width="600"/>
 
 ### Editable Fields
 
@@ -72,7 +72,7 @@ auto update yet. Please copy it manually to corresponding signature cookie.
 `Sign` presents a signing dialog that can be used to update the Signature by signing the token using a key from
 the `Keys View` that has signing capabilities
 
-<img src="gitimg/key_dialog.png" width="400"/>
+<img src="gitimg/key_dialog.png" width="600"/>
 
 ### Brute force
 
