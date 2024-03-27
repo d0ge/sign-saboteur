@@ -74,6 +74,14 @@ public class SignedTokenObjectFinder {
                 });
             });
         }
+        if (signerConfig.isEnabled(Signers.JWT)) {
+            List<ByteArray> stringCandidates  = Utils.searchByteArrayBase64URLSafe(text);
+            for (ByteArray candidate : stringCandidates) {
+                parseJSONWebSignature(candidate.toString())
+                        .ifPresent(value ->
+                                signedTokensObjects.add(new MutableSignedToken(candidate.toString(), value)));
+            }
+        }
         if (signerConfig.isEnabled(Signers.UNKNOWN)) {
             List<ByteArray> stringCandidates  = Utils.searchByteArrayBase64(text);
             for (ByteArray candidate : stringCandidates) {
@@ -105,8 +113,7 @@ public class SignedTokenObjectFinder {
 
     public static Optional<SignedToken> parseToken(String candidate) {
         Optional<SignedToken> dst = parseDjangoSignedToken(candidate);
-        dst = dst.isPresent() ? dst : parseDangerousSignedToken(candidate);
-        return dst.isPresent() ? dst : parseJSONWebSignature(candidate);
+        return dst.isPresent() ? dst : parseDangerousSignedToken(candidate);
     }
 
     private static List<MutableSignedToken> parseParameters(List<ParsedHttpParameter> params) {
@@ -457,6 +464,7 @@ public class SignedTokenObjectFinder {
         if (separator == 0) return Optional.empty();
         int index = text.lastIndexOf(separator);
         String message = text.substring(0, index);
+        if (message.isEmpty()) return Optional.empty();
         String signature = text.substring(index + 1);
         try {
             byte[] sign = Utils.normalization(signature.getBytes());

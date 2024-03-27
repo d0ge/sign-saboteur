@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0] - 2024-03-27
+
+### Changed
+
+- Tool name changed to SignSaboteur
+- Unknown web signed tokens with empty body excluded from search algorithm to avoid duplicates
+- JWT finder separated from Flask/Django implementation
+
 ## [0.0.8] - 2024-03-20
 
 ### Added

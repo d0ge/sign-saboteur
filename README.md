@@ -1,7 +1,7 @@
 # Sessionless
 
-Sessionless is a Burp Suite extension for editing, signing, verifying, attacking signed
-tokens: [Django TimestampSigner](https://docs.djangoproject.com/en/5.0/topics/signing/#verifying-timestamped-values), [ItsDangerous Signer](https://itsdangerous.palletsprojects.com/en/2.1.x/signer/), [Express cookie-session middleware](https://expressjs.com/en/resources/middleware/cookie-session.html), [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy), [Tornado’s signed cookies](https://www.tornadoweb.org/en/stable/guide/security.html), [Ruby Rails Signed cookies](https://api.rubyonrails.org/classes/ActiveSupport/MessageVerifier.html)
+SignSaboteur is a Burp Suite extension for editing, signing, verifying, and attacking signed tokens. 
+It supports different types of tokens: [Django TimestampSigner](https://docs.djangoproject.com/en/5.0/topics/signing/#verifying-timestamped-values), [ItsDangerous Signer](https://itsdangerous.palletsprojects.com/en/2.1.x/signer/), [Express cookie-session middleware](https://expressjs.com/en/resources/middleware/cookie-session.html), [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy), [Tornado’s signed cookies](https://www.tornadoweb.org/en/stable/guide/security.html), [Ruby Rails Signed cookies](https://api.rubyonrails.org/classes/ActiveSupport/MessageVerifier.html)
 and Unknown signed string.
 
 It provides automatic detection and in-line editing of token within HTTP requests/responses and WebSocket messages,
@@ -14,7 +14,7 @@ found [here](https://github.com/blackberry/jwt-editor) and [here](https://github
 
 * Ensure that Java JDK 17 or newer is installed
 * From root of project, run the command `./gradlew jar`
-* This should place the JAR file `token-library-0.0.7.jar` within the `build/libs` directory
+* This should place the JAR file `token-library-1.0.0.jar` within the `build/libs` directory
 * This can be loaded into Burp by navigating to the `Extensions` tab, `Installed` sub-tab, clicking `Add` and loading
   the JAR file
 * This BApp is using the newer Montoya API so it's best to use the latest version of Burp (try the earlier adopter
@@ -55,6 +55,7 @@ A JSON text editor is provided to edit each component that contain JSON content:
 * Dangerous Payload
 * Django Payload (except pickle serialized payload)
 * Express Payload
+* JWT Payload
 
 A timestamp editor is provided to edit each component that contain it:
 
