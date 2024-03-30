@@ -5,20 +5,19 @@ import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.HttpParameterType;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.config.SignerConfig;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.common.base.CharMatcher;
 import one.d4d.sessionless.itsdangerous.crypto.Signers;
 import one.d4d.sessionless.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SignedTokenObjectFinder {
     public static final char[] SEPARATORS = {'.', ':', '#', '|'};
-    public static final char[] ALL_SEPARATORS = {'.', ':', '!', '#', '$', '*', ';', '@', '|', '~'};
     private static final int[] SIGNATURES_LENGTH = {20, 28, 32, 48, 64};
     private static final String SIGNED_PARAM = ".SIG";
     // Regular expressions for JWS/JWE extraction
@@ -416,41 +415,13 @@ public class SignedTokenObjectFinder {
     }
 
     public static Optional<SignedToken> parseJSONWebSignature(String text) {
-        char separator = '.';
-        boolean compressed = false;
-        if (text.length() < 2) return Optional.empty();
-        String payload = text;
-
-        if (text.startsWith(".")) {
-            compressed = true;
-            payload = text.substring(1);
-        }
-        String[] parts = StringUtils.split(payload, separator);
-        if (parts.length != 3) return Optional.empty();
-        // Header parser
-        String header = compressed ? String.format(".%s", parts[0]) : parts[0];
+        DecodedJWT decodedJWT;
         try {
-            if (!Utils.isValidJSON(Utils.base64Decompress(header.getBytes()))) return Optional.empty();
-        } catch (Exception e) {
+            decodedJWT = JWT.decode(text);
+        } catch (JWTDecodeException exception) {
             return Optional.empty();
         }
-        // Body parser
-        String body = parts[1];
-        try {
-            if (!Utils.isValidJSON(Utils.base64Decompress(body.getBytes()))) return Optional.empty();
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-        // Signature parser
-        String signature = parts[2];
-        try {
-            int length = Utils.base64Decompress(signature.getBytes()).length;
-            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-        JSONWebSignature t = new JSONWebSignature(header, body, signature, new byte[]{(byte) separator});
-
+        JSONWebSignature t = new JSONWebSignature(decodedJWT.getHeader(), decodedJWT.getPayload(), decodedJWT.getSignature(), new byte[]{(byte) '.'});
         return Optional.of(t);
     }
 

@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'one.d4d'
-version = '1.0.0'
+version = '1.0.1'
 description = 'sign-saboteur'
 
 repositories {
@@ -37,7 +37,8 @@ dependencies {
             'org.exbin.deltahex:deltahex-swing:0.1.2',
             'com.fifesoft:rsyntaxtextarea:3.3.3',
             'org.json:json:20231013',
-            'org.apache.commons:commons-lang3:3.12.0'
+            'org.apache.commons:commons-lang3:3.12.0',
+            'com.auth0:java-jwt:4.4.0'
     )
     testImplementation(
             "net.portswigger.burp.extensions:montoya-api:${extender_version}",
