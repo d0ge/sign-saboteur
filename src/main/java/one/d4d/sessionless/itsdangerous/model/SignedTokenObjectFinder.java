@@ -6,20 +6,21 @@ import burp.api.montoya.http.message.params.HttpParameterType;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.config.SignerConfig;
 import com.google.common.base.CharMatcher;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jwt.SignedJWT;
 import one.d4d.sessionless.itsdangerous.crypto.Signers;
 import one.d4d.sessionless.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SignedTokenObjectFinder {
     public static final char[] SEPARATORS = {'.', ':', '#', '|'};
     public static final char[] ALL_SEPARATORS = {'.', ':', '!', '#', '$', '*', ';', '@', '|', '~'};
     private static final int[] SIGNATURES_LENGTH = {20, 28, 32, 48, 64};
+    private static final Set<JWSAlgorithm> SUPPORTED_ALGORITHMS = Set.of(JWSAlgorithm.HS256, JWSAlgorithm.HS384, JWSAlgorithm.HS512);
     private static final String SIGNED_PARAM = ".SIG";
     // Regular expressions for JWS/JWE extraction
 
@@ -78,6 +79,14 @@ public class SignedTokenObjectFinder {
             List<ByteArray> stringCandidates  = Utils.searchByteArrayBase64URLSafe(text);
             for (ByteArray candidate : stringCandidates) {
                 parseJSONWebSignature(candidate.toString())
+                        .ifPresent(value ->
+                                signedTokensObjects.add(new MutableSignedToken(candidate.toString(), value)));
+            }
+        }
+        if (signerConfig.isEnabled(Signers.NIMBUSDS)) {
+            List<ByteArray> stringCandidates  = Utils.searchByteArrayBase64URLSafe(text);
+            for (ByteArray candidate : stringCandidates) {
+                parseSignedJWT(candidate.toString(), false)
                         .ifPresent(value ->
                                 signedTokensObjects.add(new MutableSignedToken(candidate.toString(), value)));
             }
@@ -415,6 +424,26 @@ public class SignedTokenObjectFinder {
         return Optional.of(t);
     }
 
+    public static Optional<SignedToken> parseSignedJWT(String text, boolean validateToken) {
+        try {
+            SignedJWT candidate = SignedJWT.parse(text);
+            JWSHeader header = candidate.getHeader();
+            JWSAlgorithm alg = header.getAlgorithm();
+            List<String> parts = Arrays.stream(candidate.getParsedParts()).map(com.nimbusds.jose.util.Base64::toString).toList();
+            if (parts.size() != 3) return Optional.empty();
+            if (!SUPPORTED_ALGORITHMS.contains(alg) && validateToken) {
+                return Optional.empty();
+            }
+            return Optional.of(new JSONWebSignature(
+                    parts.get(0),
+                    parts.get(1),
+                    parts.get(2),
+                    new byte[]{(byte) '.'}));
+        }catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
     public static Optional<SignedToken> parseJSONWebSignature(String text) {
         char separator = '.';
         boolean compressed = false;
@@ -444,8 +473,8 @@ public class SignedTokenObjectFinder {
         // Signature parser
         String signature = parts[2];
         try {
-            int length = Utils.base64Decompress(signature.getBytes()).length;
-            if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == length)) return Optional.empty();
+            byte[] sign = Utils.normalization(signature.getBytes());
+            if (sign == null || Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == sign.length)) return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }

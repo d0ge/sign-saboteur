@@ -7,6 +7,7 @@ import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import one.d4d.sessionless.keys.SecretKey;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.Mac;
@@ -413,6 +414,18 @@ public class Utils {
             reader.lines().forEach(x -> result.add(gson.fromJson(x, String.class)));
         } catch (Exception e) {
             return new HashSet<>();
+        }
+        return result;
+    }
+
+    public static List<SecretKey> readDefaultSecretKeys(final String fileName, Class clazz) {
+        List<SecretKey> result = new ArrayList<>();
+        try (InputStream inputStream = clazz.getResourceAsStream(fileName);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            Gson gson = new Gson();
+            reader.lines().forEach(x -> result.add(gson.fromJson(x, SecretKey.class)));
+        } catch (Exception e) {
+            return new ArrayList<>();
         }
         return result;
     }

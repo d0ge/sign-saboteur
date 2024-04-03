@@ -30,6 +30,7 @@ public class SettingsView {
     private JCheckBox checkBoxEnableTornadoSignedString;
     private JCheckBox checkBoxEnableRubySignedString;
     private JCheckBox checkBoxEnableJWT;
+    private JCheckBox checkBoxNIMBUSDS;
 
     public SettingsView(Window parent, BurpConfig burpConfig, UserInterface userInterface) {
         this.parent = parent;
@@ -74,6 +75,10 @@ public class SettingsView {
         checkBoxEnableJWT.setSelected(signerConfig.isEnabled(Signers.JWT));
         checkBoxEnableJWT.addActionListener(e ->
                 signerConfig.toggleEnabled(Signers.JWT, checkBoxEnableJWT.isSelected()));
+
+        checkBoxNIMBUSDS.setSelected(signerConfig.isEnabled(Signers.NIMBUSDS));
+        checkBoxNIMBUSDS.addActionListener(e ->
+                signerConfig.toggleEnabled(Signers.NIMBUSDS, checkBoxNIMBUSDS.isSelected()));
 
         checkBoxEnableUnknownSignedString.setSelected(signerConfig.isEnabled(Signers.UNKNOWN));
         checkBoxEnableUnknownSignedString.addActionListener(e ->

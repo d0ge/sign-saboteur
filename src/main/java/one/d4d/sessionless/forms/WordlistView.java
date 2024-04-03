@@ -41,6 +41,7 @@ public class WordlistView {
     private JTextArea textAreaSecrets;
     private JButton secretsAddButton;
     private JButton saltsAddButton;
+    private JButton buttonLoadDefaults;
     private JMenuItem menuItemDelete;
     private JMenuItem menuItemCopy;
 
@@ -94,6 +95,7 @@ public class WordlistView {
 
         // Attach event handlers for button clicks
         newKeyButton.addActionListener(e -> presenter.onButtonNewSecretKeyClick());
+        buttonLoadDefaults.addActionListener(e -> presenter.onButtonLoadDefaultsClick());
     }
 
     public Component getUiComponent() {

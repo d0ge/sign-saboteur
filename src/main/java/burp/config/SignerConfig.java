@@ -12,7 +12,7 @@ public class SignerConfig {
     private Set<Signers> enabled;
 
     public SignerConfig() {
-        EnumSet<Signers> disabled = EnumSet.of(Signers.OAUTH, Signers.UNKNOWN);
+        EnumSet<Signers> disabled = EnumSet.of(Signers.OAUTH, Signers.NIMBUSDS, Signers.UNKNOWN);
         this.enabled = EnumSet.complementOf(disabled);
     }
 

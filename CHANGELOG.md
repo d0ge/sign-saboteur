@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1] - 2024-04-03
+
+### Changed
+
+- Default Secret Keys now available at Wordlist View
+- The com.nimbusds.jwt SignedJWT parser added to the finder logic. _Note_ RSA and ECDSA not supported by the extension yet
+
 ## [1.0.0] - 2024-03-27
 
 ### Changed
