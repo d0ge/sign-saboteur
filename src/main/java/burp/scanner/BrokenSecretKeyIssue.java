@@ -7,9 +7,8 @@ import burp.api.montoya.scanner.audit.issues.AuditIssue;
 import burp.api.montoya.scanner.audit.issues.AuditIssueConfidence;
 import burp.api.montoya.scanner.audit.issues.AuditIssueDefinition;
 import burp.api.montoya.scanner.audit.issues.AuditIssueSeverity;
-import one.d4d.sessionless.itsdangerous.model.SignedToken;
-import one.d4d.sessionless.keys.SecretKey;
-import one.d4d.sessionless.utils.Utils;
+import one.d4d.signsaboteur.keys.SecretKey;
+import one.d4d.signsaboteur.utils.Utils;
 
 import java.util.Collections;
 import java.util.List;

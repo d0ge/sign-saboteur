@@ -7,7 +7,7 @@ import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.api.montoya.utilities.ByteUtils;
 import burp.config.ProxyConfig;
 import burp.config.SignerConfig;
-import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
+import one.d4d.signsaboteur.itsdangerous.model.SignedTokenObjectFinder;
 
 import java.util.List;
 

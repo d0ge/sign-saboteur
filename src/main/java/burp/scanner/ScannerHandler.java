@@ -13,13 +13,13 @@ import burp.api.montoya.scanner.audit.issues.AuditIssue;
 import burp.api.montoya.scanner.audit.issues.AuditIssueConfidence;
 import burp.api.montoya.scanner.audit.issues.AuditIssueSeverity;
 import burp.config.SignerConfig;
-import one.d4d.sessionless.itsdangerous.Attack;
-import one.d4d.sessionless.itsdangerous.BruteForce;
-import one.d4d.sessionless.itsdangerous.model.MutableSignedToken;
-import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
-import one.d4d.sessionless.keys.SecretKey;
-import one.d4d.sessionless.presenter.PresenterStore;
-import one.d4d.sessionless.utils.Utils;
+import one.d4d.signsaboteur.itsdangerous.Attack;
+import one.d4d.signsaboteur.itsdangerous.BruteForce;
+import one.d4d.signsaboteur.itsdangerous.model.MutableSignedToken;
+import one.d4d.signsaboteur.itsdangerous.model.SignedTokenObjectFinder;
+import one.d4d.signsaboteur.keys.SecretKey;
+import one.d4d.signsaboteur.presenter.PresenterStore;
+import one.d4d.signsaboteur.utils.Utils;
 
 import java.util.*;
 

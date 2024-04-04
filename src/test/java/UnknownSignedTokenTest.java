@@ -1,10 +1,10 @@
-import one.d4d.sessionless.itsdangerous.*;
-import one.d4d.sessionless.itsdangerous.crypto.DjangoTokenSigner;
-import one.d4d.sessionless.itsdangerous.model.SignedToken;
-import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
-import one.d4d.sessionless.itsdangerous.model.UnknownSignedToken;
-import one.d4d.sessionless.keys.SecretKey;
-import one.d4d.sessionless.utils.Utils;
+import one.d4d.signsaboteur.itsdangerous.*;
+import one.d4d.signsaboteur.itsdangerous.crypto.DjangoTokenSigner;
+import one.d4d.signsaboteur.itsdangerous.model.SignedToken;
+import one.d4d.signsaboteur.itsdangerous.model.SignedTokenObjectFinder;
+import one.d4d.signsaboteur.itsdangerous.model.UnknownSignedToken;
+import one.d4d.signsaboteur.keys.SecretKey;
+import one.d4d.signsaboteur.utils.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

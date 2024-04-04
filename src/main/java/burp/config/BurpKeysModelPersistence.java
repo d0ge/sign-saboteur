@@ -2,14 +2,16 @@ package burp.config;
 
 import burp.api.montoya.persistence.Preferences;
 import com.google.gson.Gson;
-import one.d4d.sessionless.utils.GsonHelper;
-import one.d4d.sessionless.utils.Utils;
+import one.d4d.signsaboteur.keys.SecretKey;
+import one.d4d.signsaboteur.utils.GsonHelper;
+import one.d4d.signsaboteur.utils.Utils;
 
 import java.io.File;
+import java.util.List;
 import java.util.Set;
 
 public class BurpKeysModelPersistence {
-    static final String BURP_SETTINGS_NAME = "one.d4d.sessionless.keys";
+    static final String BURP_SETTINGS_NAME = "one.d4d.signsaboteur.keys";
     private final Preferences preferences;
 
     public BurpKeysModelPersistence(Preferences preferences) {
@@ -23,6 +25,7 @@ public class BurpKeysModelPersistence {
             KeysModel model = new KeysModel();
             model.setSalts(loadDefaultSalts());
             model.setSecrets(loadDefaultSecrets());
+            loadDefaultKeys().forEach(model::addKey);
             return model;
         }
 
@@ -61,6 +64,9 @@ public class BurpKeysModelPersistence {
 
     private Set<String> loadDefaultSalts() {
         return Utils.readResourceForClass("/salts", this.getClass());
+    }
+    private List<SecretKey> loadDefaultKeys() {
+        return Utils.readDefaultSecretKeys("/keys", this.getClass());
     }
 
 }

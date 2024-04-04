@@ -1,9 +1,9 @@
-import one.d4d.sessionless.itsdangerous.*;
-import one.d4d.sessionless.itsdangerous.model.JSONWebSignature;
-import one.d4d.sessionless.itsdangerous.model.SignedToken;
-import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
-import one.d4d.sessionless.keys.SecretKey;
-import one.d4d.sessionless.utils.ClaimsUtils;
+import one.d4d.signsaboteur.itsdangerous.*;
+import one.d4d.signsaboteur.itsdangerous.model.JSONWebSignature;
+import one.d4d.signsaboteur.itsdangerous.model.SignedToken;
+import one.d4d.signsaboteur.itsdangerous.model.SignedTokenObjectFinder;
+import one.d4d.signsaboteur.keys.SecretKey;
+import one.d4d.signsaboteur.utils.ClaimsUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +27,30 @@ public class JSONWebSignatureTest {
         } else {
             Assertions.fail("Token not found.");
         }
+    }
+    @Test
+    void JWTNimbus() {
+        final Set<String> secrets = new HashSet<>(List.of("your-256-bit-secret"));
+        final Set<String> salts = new HashSet<>(List.of("salt"));
+        final List<SecretKey> knownKeys = new ArrayList<>();
+        String value = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+
+        Optional<SignedToken> optionalToken = SignedTokenObjectFinder.parseSignedJWT(value, true);
+        if (optionalToken.isPresent()) {
+            JSONWebSignature token = (JSONWebSignature) optionalToken.get();
+            BruteForce bf = new BruteForce(secrets, salts, knownKeys, Attack.FAST, token);
+            SecretKey sk = bf.parallel();
+            Assertions.assertNotNull(sk);
+        } else {
+            Assertions.fail("Token not found.");
+        }
+    }
+
+    @Test
+    void JSONWebTokenRS256Test() {
+        String value = "eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.VUPWQZuClnkFbaEKCsPy7CZVMh5wxbCSpaAWFLpnTe9J0--PzHNeTFNXCrVHysAa3eFbuzD8_bLSsgTKC8SzHxRVSj5eN86vBPo_1fNfE7SHTYhWowjY4E_wuiC13yoj";
+        Optional<SignedToken> optionalToken = SignedTokenObjectFinder.parseSignedJWT(value, true);
+        Assertions.assertTrue(optionalToken.isEmpty());
     }
 
     @Test

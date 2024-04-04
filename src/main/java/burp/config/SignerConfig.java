@@ -1,7 +1,7 @@
 package burp.config;
 
 import com.google.gson.annotations.Expose;
-import one.d4d.sessionless.itsdangerous.crypto.Signers;
+import one.d4d.signsaboteur.itsdangerous.crypto.Signers;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -12,7 +12,7 @@ public class SignerConfig {
     private Set<Signers> enabled;
 
     public SignerConfig() {
-        EnumSet<Signers> disabled = EnumSet.of(Signers.OAUTH, Signers.UNKNOWN);
+        EnumSet<Signers> disabled = EnumSet.of(Signers.OAUTH, Signers.NIMBUSDS, Signers.UNKNOWN);
         this.enabled = EnumSet.complementOf(disabled);
     }
 

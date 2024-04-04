@@ -1,5 +1,5 @@
-import one.d4d.sessionless.itsdangerous.crypto.DangerousTokenSigner;
-import one.d4d.sessionless.itsdangerous.model.DangerousSignedToken;
+import one.d4d.signsaboteur.itsdangerous.crypto.DangerousTokenSigner;
+import one.d4d.signsaboteur.itsdangerous.model.DangerousSignedToken;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;

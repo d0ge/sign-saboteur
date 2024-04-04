@@ -1,12 +1,12 @@
 import burp.config.KeysModel;
 import com.google.gson.Gson;
-import one.d4d.sessionless.itsdangerous.Algorithms;
-import one.d4d.sessionless.itsdangerous.Derivation;
-import one.d4d.sessionless.itsdangerous.MessageDerivation;
-import one.d4d.sessionless.itsdangerous.MessageDigestAlgorithm;
-import one.d4d.sessionless.keys.SecretKey;
-import one.d4d.sessionless.utils.GsonHelper;
-import one.d4d.sessionless.utils.Utils;
+import one.d4d.signsaboteur.itsdangerous.Algorithms;
+import one.d4d.signsaboteur.itsdangerous.Derivation;
+import one.d4d.signsaboteur.itsdangerous.MessageDerivation;
+import one.d4d.signsaboteur.itsdangerous.MessageDigestAlgorithm;
+import one.d4d.signsaboteur.keys.SecretKey;
+import one.d4d.signsaboteur.utils.GsonHelper;
+import one.d4d.signsaboteur.utils.Utils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

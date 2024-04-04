@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class BurpConfigPersistence {
-    static final String BURP_SETTINGS_NAME = "one.d4d.sessionless.settings";
+    static final String BURP_SETTINGS_NAME = "one.d4d.signsaboteur.settings";
     private final Preferences preferences;
 
     public BurpConfigPersistence(Preferences preferences) {

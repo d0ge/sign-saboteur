@@ -1,7 +1,7 @@
 package burp.config;
 
 import com.google.gson.annotations.Expose;
-import one.d4d.sessionless.keys.SecretKey;
+import one.d4d.signsaboteur.keys.SecretKey;
 
 import java.util.*;
 import java.util.stream.IntStream;

@@ -1,7 +1,7 @@
-import one.d4d.sessionless.itsdangerous.crypto.OauthProxyTokenSigner;
-import one.d4d.sessionless.itsdangerous.model.OauthProxySignedToken;
-import one.d4d.sessionless.itsdangerous.model.SignedToken;
-import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
+import one.d4d.signsaboteur.itsdangerous.crypto.OauthProxyTokenSigner;
+import one.d4d.signsaboteur.itsdangerous.model.OauthProxySignedToken;
+import one.d4d.signsaboteur.itsdangerous.model.SignedToken;
+import one.d4d.signsaboteur.itsdangerous.model.SignedTokenObjectFinder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

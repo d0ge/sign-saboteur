@@ -2,7 +2,7 @@ package burp.config;
 
 import burp.proxy.HighlightColor;
 import com.google.gson.annotations.Expose;
-import one.d4d.sessionless.utils.Utils;
+import one.d4d.signsaboteur.utils.Utils;
 
 import static burp.proxy.HighlightColor.GREEN;
 

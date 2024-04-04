@@ -1,9 +1,9 @@
-import one.d4d.sessionless.itsdangerous.Attack;
-import one.d4d.sessionless.itsdangerous.BruteForce;
-import one.d4d.sessionless.itsdangerous.crypto.DangerousTokenSigner;
-import one.d4d.sessionless.itsdangerous.model.SignedToken;
-import one.d4d.sessionless.itsdangerous.model.SignedTokenObjectFinder;
-import one.d4d.sessionless.keys.SecretKey;
+import one.d4d.signsaboteur.itsdangerous.Attack;
+import one.d4d.signsaboteur.itsdangerous.BruteForce;
+import one.d4d.signsaboteur.itsdangerous.crypto.DangerousTokenSigner;
+import one.d4d.signsaboteur.itsdangerous.model.SignedToken;
+import one.d4d.signsaboteur.itsdangerous.model.SignedTokenObjectFinder;
+import one.d4d.signsaboteur.keys.SecretKey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

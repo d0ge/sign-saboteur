@@ -1,4 +1,4 @@
-import one.d4d.sessionless.utils.Utils;
+import one.d4d.signsaboteur.utils.Utils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;

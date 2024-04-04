@@ -1,6 +1,6 @@
 package burp.config;
 
-import one.d4d.sessionless.keys.SecretKey;
+import one.d4d.signsaboteur.keys.SecretKey;
 
 public interface KeysModelListener {
     void notifyKeyInserted(SecretKey key);

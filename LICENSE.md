@@ -220,6 +220,6 @@ Copyright 2012-2023, Fraser Winterborn and Dolph Flynn
 Licensed under Apache-2.0 as above
 
 A class from: https://github.com/librespot-org/librespot-java
-Included in one/d4d/sessionless/utils/Base62.java
+Included in one/d4d/signsaboteur/utils/Base62.java
 Copyright 2018-2021, devgianlu
 Licensed under Apache-2.0 as above
