@@ -207,6 +207,28 @@ public class TokenSigner implements Cloneable {
                     SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
                     return f.generateSecret(spec).getEncoded();
                 }
+                case RUBY_KEY_GENERATOR -> {
+                    KeySpec spec = new PBEKeySpec(
+                            (new String(secret_key)).toCharArray(),
+                            salt,
+                            1000,
+                            64 * 8
+                    );
+                    // PBKDF2With<prf> - Password-based key-derivation algorithm defined in PKCS #5:
+                    // Password-Based Cryptography Specification, Version 2.1 using the specified pseudo-random function (<prf>).
+                    // Example:
+                    // PBKDF2WithHmacSHA256.
+                    String PRF = "HmacSHA256";
+                    switch (messageDigestAlgorithm){
+                        case SHA1 -> PRF = Algorithms.SHA1.name;
+                        case SHA224 -> PRF = Algorithms.SHA224.name;
+                        case SHA256 -> PRF = Algorithms.SHA256.name;
+                        case SHA384 -> PRF = Algorithms.SHA384.name;
+                        case SHA512 -> PRF = Algorithms.SHA512.name;
+                    }
+                    SecretKeyFactory f = SecretKeyFactory.getInstance(String.format("PBKDF2With%s", PRF));
+                    return f.generateSecret(spec).getEncoded();
+                }
                 default -> throw new DerivationException("Unknown key derivation method");
             }
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {

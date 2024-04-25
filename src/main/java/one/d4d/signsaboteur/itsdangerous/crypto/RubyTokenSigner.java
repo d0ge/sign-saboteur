@@ -13,7 +13,7 @@ import java.util.EnumSet;
 public class RubyTokenSigner extends TokenSigner {
     public RubyTokenSigner(SecretKey key) {
         super(key);
-        this.knownDerivations = EnumSet.of(Derivation.RUBY);
+        this.knownDerivations = EnumSet.of(Derivation.RUBY_KEY_GENERATOR, Derivation.RUBY);
     }
 
     public RubyTokenSigner(byte[] sep) {
@@ -21,7 +21,7 @@ public class RubyTokenSigner extends TokenSigner {
     }
 
     public RubyTokenSigner(byte[] secret_key, byte[] sep) {
-        this(Algorithms.SHA1, Derivation.RUBY, MessageDerivation.NONE, MessageDigestAlgorithm.NONE, secret_key, new byte[]{}, sep);
+        this(Algorithms.SHA1, Derivation.RUBY_KEY_GENERATOR, MessageDerivation.NONE, MessageDigestAlgorithm.SHA256, secret_key, new byte[]{}, sep);
     }
 
     public RubyTokenSigner(
@@ -33,7 +33,7 @@ public class RubyTokenSigner extends TokenSigner {
             byte[] salt,
             byte[] sep) {
         super(digestMethod, keyDerivation, messageDerivation, digest, secret_key, salt, sep);
-        this.knownDerivations = EnumSet.of(Derivation.RUBY);
+        this.knownDerivations = EnumSet.of(Derivation.RUBY_KEY_GENERATOR, Derivation.RUBY);
     }
 
     @Override

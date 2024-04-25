@@ -10,11 +10,17 @@ import one.d4d.signsaboteur.itsdangerous.crypto.TokenSigner;
 
 public class UnknownSignedToken extends SignedToken {
     public byte[] separator;
+    public boolean isURLEncoded = false;
 
-    public UnknownSignedToken(String message, String signature, byte[] separator) {
+    public UnknownSignedToken(String message, String signature, byte[] separator){
+        this(message, signature, separator, false);
+    }
+
+    public UnknownSignedToken(String message, String signature, byte[] separator, boolean isURLEncoded) {
         super(message);
         this.signature = signature;
         this.separator = separator;
+        this.isURLEncoded = isURLEncoded;
         this.signer = new TokenSigner(
                 Algorithms.SHA256,
                 Derivation.NONE,
@@ -41,6 +47,7 @@ public class UnknownSignedToken extends SignedToken {
 
     }
 
+    public boolean isURLEncoded() { return isURLEncoded;}
     public String getSignersName() {
         return Signers.UNKNOWN.name();
     }

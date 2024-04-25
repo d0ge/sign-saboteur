@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.3] - 2024-04-25
+
+### Added
+
+- New key derivation: Ruby Key Generator
+- JSON editor for Ruby tokens
+
+### Changed
+
+- Ruby on rails signer was updated to support different Key Generators
+
 ## [1.0.2] - 2024-04-04
 
 ### Changed

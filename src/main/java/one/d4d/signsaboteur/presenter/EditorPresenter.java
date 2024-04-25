@@ -16,6 +16,9 @@ import one.d4d.signsaboteur.utils.ErrorLoggingActionListenerFactory;
 import one.d4d.signsaboteur.utils.Utils;
 
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
@@ -165,17 +168,30 @@ public class EditorPresenter extends Presenter {
     }
 
     private RubySignedToken getRuby() {
-        String message = view.getRubyMessage();
+//        String message = URLEncoder.encode(Base64.getUrlEncoder().encodeToString(view.getRubyMessage().getBytes()), StandardCharsets.UTF_8);
+        boolean isURLEncoded = view.getRubyIsURLEncoded();
+        String message = Base64.getUrlEncoder().encodeToString(Utils.compactJSON(view.getRubyMessage()).getBytes());
+        if(isURLEncoded) {
+            message = URLEncoder.encode(message, StandardCharsets.UTF_8);
+        }
         String signature = view.getRubySignature();
         byte[] separator = view.getRubySeparator().length == 0 ? new byte[]{46} : view.getRubySeparator();
-
-        return new RubySignedToken(message, signature, separator);
+        return new RubySignedToken(message, signature, separator, isURLEncoded);
     }
 
     private void setRuby(RubySignedToken token) {
-        view.setRubyMessage(token.getEncodedMessage());
+//        view.setRubyMessage(new String(Base64.getUrlDecoder().decode(URLDecoder.decode(token.getEncodedMessage(), StandardCharsets.UTF_8))));
+        boolean isURLEncoded = token.isURLEncoded();
+        String message = token.getEncodedMessage();
+        if (isURLEncoded) {
+            message = URLDecoder.decode(token.getEncodedMessage(), StandardCharsets.UTF_8);
+        }
+        message = new String(Base64.getUrlDecoder().decode(message));
+        message = Utils.prettyPrintJSON(message);
+        view.setRubyMessage(message);
         view.setRubySignature(token.getEncodedSignature());
         view.setRubySeparator(token.getSeparator());
+        view.setUnknownIsURLEncoded(isURLEncoded);
     }
 
     private JSONWebSignature getJSONWebSignature() {
@@ -197,14 +213,16 @@ public class EditorPresenter extends Presenter {
         String message = view.getUnknownMessage();
         String signature = view.getUnknownSignature();
         byte[] separator = view.getUnknownSeparator().length == 0 ? new byte[]{46} : view.getUnknownSeparator();
+        boolean isURLEncoded = view.getUnknownIsURLEncoded();
 
-        return new UnknownSignedToken(message, signature, separator);
+        return new UnknownSignedToken(message, signature, separator, isURLEncoded);
     }
 
     private void setUnknown(UnknownSignedToken token) {
         view.setUnknownMessage(token.getEncodedMessage());
         view.setUnknownSignature(token.getEncodedSignature());
         view.setUnknownSeparator(token.getSeparator());
+        view.setUnknownIsURLEncoded(token.isURLEncoded());
     }
 
 

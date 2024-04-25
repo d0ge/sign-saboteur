@@ -4,6 +4,7 @@ import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.HttpParameterType;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
+import burp.api.montoya.utilities.URLUtils;
 import burp.config.SignerConfig;
 import com.google.common.base.CharMatcher;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -13,6 +14,8 @@ import one.d4d.signsaboteur.itsdangerous.crypto.Signers;
 import one.d4d.signsaboteur.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,6 +78,17 @@ public class SignedTokenObjectFinder {
                     parseRubySignedToken(name, value).ifPresent(v -> signedTokensObjects.add(new MutableSignedToken(value, v)));
                 });
             });
+
+            List<ByteArray> stringCandidates  = Utils.searchByteArrayRuby(text);
+            for (ByteArray candidate : stringCandidates) {
+                parseRubySignedToken("", candidate.toString())
+                        .ifPresent(value -> {
+                            if(signedTokensObjects.stream().noneMatch(test -> test.getOriginal().equalsIgnoreCase(candidate.toString())))
+                                signedTokensObjects.add(new MutableSignedToken(candidate.toString(), value));
+                            }
+                        );
+            }
+
         }
         if (signerConfig.isEnabled(Signers.JWT)) {
             List<ByteArray> stringCandidates  = Utils.searchByteArrayBase64URLSafe(text);
@@ -493,6 +507,7 @@ public class SignedTokenObjectFinder {
         if (separator == 0) return Optional.empty();
         int index = text.lastIndexOf(separator);
         String message = text.substring(0, index);
+        boolean isUrlencoded = message.indexOf('%') > -1;
         if (message.isEmpty()) return Optional.empty();
         String signature = text.substring(index + 1);
         try {
@@ -503,25 +518,27 @@ public class SignedTokenObjectFinder {
             return Optional.empty();
         }
 
-        UnknownSignedToken t = new UnknownSignedToken(message, signature, new byte[]{(byte) separator});
+        UnknownSignedToken t = new UnknownSignedToken(message, signature, new byte[]{(byte) separator}, isUrlencoded);
         return Optional.of(t);
     }
 
     public static Optional<SignedToken> parseRubySignedToken(String key, String value) {
-        String sep = "--";
-        String[] parts = StringUtils.split(value, sep);
+        String[] parts = value.split("--");
         if (parts.length == 2) {
             String payload = parts[0];
             String signature = parts[1];
+            boolean isURLEncoded = payload.indexOf('%') > -1;
             try {
-                Base64.getUrlDecoder().decode(payload);
-                byte[] sign = Utils.normalization(signature.getBytes());
+                String tmp = payload;
+                if (isURLEncoded) tmp = URLDecoder.decode(payload, StandardCharsets.UTF_8);
+                Base64.getUrlDecoder().decode(tmp);
+                byte[] sign = Utils.normalization((URLDecoder.decode(signature, StandardCharsets.UTF_8)).getBytes());
                 if (sign == null) return Optional.empty();
                 if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == sign.length)) return Optional.empty();
             } catch (Exception e) {
                 return Optional.empty();
             }
-            RubySignedToken t = new RubySignedToken(payload, signature);
+            RubySignedToken t = new RubySignedToken(payload, signature, isURLEncoded);
             return Optional.of(t);
         }
 

@@ -12,7 +12,8 @@ public enum Derivation {
     @Expose @SerializedName("6") NONE("none"),
     @Expose @SerializedName("7") RUBY("RUBY"),
     @Expose @SerializedName("8") RUBY5("RUBY5"),
-    @Expose @SerializedName("9") RUBY5_TRUNCATED("RUBY5_TRUNCATED");
+    @Expose @SerializedName("9") RUBY5_TRUNCATED("RUBY5_TRUNCATED"),
+    @Expose @SerializedName("10") RUBY_KEY_GENERATOR("RUBY_KEY_GENERATOR");
     public final String name;
 
     Derivation(String name) {

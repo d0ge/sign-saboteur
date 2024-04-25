@@ -81,6 +81,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     private JPanel panelJSONWebSeparator;
     private RSyntaxTextArea textAreaJSONWebSignatureHeader;
     private RSyntaxTextArea textAreaJSONWebSignaturePayload;
+    private JCheckBox checkBoxUnknownURLEncoded;
+    private JCheckBox checkBoxRubyURLEncoded;
     private CodeArea codeAreaDangerousSignature;
     private CodeArea codeAreaDangerousSeparator;
     private CodeArea codeAreaOAuthSignature;
@@ -149,6 +151,8 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         checkBoxIsJSON.addActionListener(e -> presenter.componentChanged());
         checkBoxDjango.addActionListener(e -> presenter.componentChanged());
         checkBoxCompress.addActionListener(e -> presenter.componentChanged());
+        checkBoxRubyURLEncoded.addActionListener(e -> presenter.componentChanged());
+        checkBoxUnknownURLEncoded.addActionListener(e -> presenter.componentChanged());
 
         codeAreaDangerousSignature.addDataChangedListener(presenter::componentChanged);
         codeAreaDangerousSeparator.addDataChangedListener(presenter::componentChanged);
@@ -337,6 +341,14 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         textAreaRubyMessage.setText(text);
     }
 
+    public boolean getRubyIsURLEncoded() {
+        return checkBoxRubyURLEncoded.isSelected();
+    }
+
+    public void setRubyIsURLEncoded(boolean enabled) {
+        checkBoxRubyURLEncoded.setSelected(enabled);
+    }
+
     public String getRubySignature() {
         return textAreaRubySignature.getText();
     }
@@ -392,6 +404,14 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setUnknownMessage(String text) {
         textAreaUnknownStringMessage.setText(text);
     }
+    public boolean getUnknownIsURLEncoded() {
+        return checkBoxUnknownURLEncoded.isSelected();
+    }
+
+    public void setUnknownIsURLEncoded(boolean enabled) {
+        checkBoxUnknownURLEncoded.setSelected(enabled);
+    }
+
 
     public String getUnknownSignature() {
         return textAreaUnknownStringSignature.getText();
@@ -521,7 +541,6 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setDangerousMode() {
         mode = TAB_DANGEROUS;
         enableTabAtIndex(TAB_DANGEROUS);
-        buttonBruteForceAttack.setEnabled(editable);
         buttonAttack.setEnabled(editable);
         textAreaDangerousPayload.setEditable(editable);
         textAreaDangerousTimestamp.setEditable(editable);
@@ -542,7 +561,6 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setExpressMode() {
         mode = TAB_EXPRESS;
         enableTabAtIndex(TAB_EXPRESS);
-        buttonBruteForceAttack.setEnabled(editable);
         buttonAttack.setEnabled(editable);
         textAreaExpressParameter.setEditable(false);
         textAreaExpressPayload.setEditable(editable);
@@ -552,7 +570,6 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setOAuthMode() {
         mode = TAB_OAUTH;
         enableTabAtIndex(TAB_OAUTH);
-        buttonBruteForceAttack.setEnabled(editable);
         buttonAttack.setEnabled(false);
         textAreaOAuthParameter.setEditable(false);
         textAreaOAuthPayload.setEditable(editable);
@@ -565,7 +582,6 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setTornadoMode() {
         mode = TAB_TORNADO;
         enableTabAtIndex(TAB_TORNADO);
-        buttonBruteForceAttack.setEnabled(editable);
         buttonAttack.setEnabled(editable);
 
         textAreaTornadoTimestamp.setEditable(editable);
@@ -579,7 +595,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setRubyMode() {
         mode = TAB_RUBY;
         enableTabAtIndex(TAB_RUBY);
-        buttonBruteForceAttack.setEnabled(editable);
+        checkBoxRubyURLEncoded.setEnabled(editable);
         buttonAttack.setEnabled(editable);
 
         textAreaRubyMessage.setEditable(editable);
@@ -592,7 +608,6 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setJWTMode() {
         mode = TAB_JWT;
         enableTabAtIndex(TAB_JWT);
-        buttonBruteForceAttack.setEnabled(editable);
         buttonAttack.setEnabled(editable);
 
         textAreaJSONWebSignatureHeader.setEditable(editable);
@@ -606,7 +621,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public void setUnknownMode() {
         mode = TAB_UNKNOWN;
         enableTabAtIndex(TAB_UNKNOWN);
-        buttonBruteForceAttack.setEnabled(editable);
+        checkBoxUnknownURLEncoded.setEnabled(editable);
         buttonAttack.setEnabled(editable);
 
         textAreaUnknownStringMessage.setEditable(editable);

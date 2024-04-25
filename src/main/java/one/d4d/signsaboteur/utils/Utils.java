@@ -42,6 +42,7 @@ public class Utils {
     static Set<Integer> BASE64_SET = Set.of(37, 43, 47, 45, 95, 65, 97, 66, 98, 67, 99, 68, 100, 69, 101, 70, 102, 71, 103, 72, 104, 73, 105, 74, 106, 75, 107, 76, 108, 77, 109, 78, 110, 79, 111, 80, 112, 81, 113, 82, 114, 83, 115, 84, 116, 85, 117, 86, 118, 87, 119, 88, 120, 89, 121, 90, 122, 48,49,50,51,52,53,54,55,56,57);
     static Set<Integer> SEPARATORS_SET = Set.of(46, 58, 35, 124); // . : # |
 
+
     private static List<ByteArray> searchByteArray(ByteArray data, Set<Integer> alphabet, int size) {
         int length = 0;
         List<ByteArray> ret = new ArrayList<>();
@@ -66,6 +67,10 @@ public class Utils {
 
     public static List<ByteArray> searchByteArrayBase64(ByteArray data) {
         return searchByteArray(data, Sets.union(BASE64_SET, SEPARATORS_SET) , 28);
+    }
+
+    public static List<ByteArray> searchByteArrayRuby(ByteArray data) {
+        return searchByteArray(data, Sets.union(BASE64_URL_SET, Set.of(37, 61)) , 28);
     }
 
     public static String getSignedTokenIDWithHash(String token)  {

@@ -67,17 +67,14 @@ public class ResponseEditorView extends EditorTab implements ExtensionProvidedHt
                 MimeType.IMAGE_PNG,
                 MimeType.IMAGE_SVG_XML,
                 MimeType.IMAGE_TIFF,
-                MimeType.SCRIPT,
-                MimeType.CSS,
                 MimeType.SOUND,
                 MimeType.VIDEO
                 );
-        ByteArray content = ByteArray.byteArray("");
         MimeType type = requestResponse.response().statedMimeType();
-        if (!disabled.contains(type)) {
-            content = requestResponse.response().toByteArray();
+        if (disabled.contains(type)) {
+            return false;
         }
-        return presenter.isEnabled(content, requestResponse.response().cookies(), null);
+        return presenter.isEnabled(requestResponse.response().toByteArray(), requestResponse.response().cookies(), null);
     }
 
     @Override

@@ -65,7 +65,7 @@ public class BruteForce {
         secrets.forEach(secret -> {
             messages.forEach(md -> {
                 derivations.forEach(d -> {
-                    if (d == Derivation.CONCAT || d == Derivation.DJANGO || d == Derivation.HASH) {
+                    if (d == Derivation.CONCAT || d == Derivation.DJANGO || d == Derivation.HASH || d == Derivation.RUBY_KEY_GENERATOR) {
                         digests.forEach(mda -> {
                             attacks.addAll(is.cloneWithSaltDerivation(secret, salts, d, md, mda));
                         });
