@@ -27,11 +27,13 @@ import static burp.api.montoya.scanner.ConsolidationAction.KEEP_BOTH;
 import static burp.api.montoya.scanner.ConsolidationAction.KEEP_EXISTING;
 
 public class ScannerHandler implements ScanCheck {
+    private final PresenterStore presenters;
     private final ScannerPresenter presenter;
     private final SignerConfig signerConfig;
 
     public ScannerHandler(PresenterStore presenters, SignerConfig signerConfig) {
         this.signerConfig = signerConfig;
+        this.presenters = presenters;
         this.presenter = new ScannerPresenter(presenters);
     }
 
@@ -97,7 +99,7 @@ public class ScannerHandler implements ScanCheck {
                 .toList();
 
         for (MutableSignedToken token : unknownTokens) {
-            BruteForce worker = new BruteForce(signingSecrets, signingSalts, signingKeys, Attack.FAST, token.getModified());
+            BruteForce worker = new BruteForce(signingSecrets, signingSalts, signingKeys, Attack.FAST, token.getModified(), presenters);
             SecretKey foundKey = worker.parallel();
             if (foundKey != null) {
                 List<Marker> highlights = new LinkedList<>();

@@ -5,6 +5,8 @@ import one.d4d.signsaboteur.itsdangerous.crypto.TokenSigner;
 import one.d4d.signsaboteur.itsdangerous.model.SignedToken;
 import one.d4d.signsaboteur.itsdangerous.model.UnknownSignedToken;
 import one.d4d.signsaboteur.keys.SecretKey;
+import one.d4d.signsaboteur.presenter.Presenter;
+import one.d4d.signsaboteur.presenter.PresenterStore;
 import one.d4d.signsaboteur.utils.Utils;
 
 import java.util.ArrayList;
@@ -13,12 +15,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 
-public class BruteForce {
+public class BruteForce extends Presenter {
     private final Set<String> secrets;
     private final Set<String> salts;
     private final List<SecretKey> signingKeys;
     private final Attack scanConfiguration;
     private final SignedToken token;
+    private final PresenterStore presenters;
     private ExecutorService executor;
 
     public BruteForce(Set<String> secrets,
@@ -26,11 +29,27 @@ public class BruteForce {
                       List<SecretKey> signingKeys,
                       Attack scanConfiguration,
                       SignedToken token) {
+        this.token = token;
+        this.scanConfiguration = scanConfiguration;
+        this.signingKeys = signingKeys;
+        this.salts = salts;
+        this.secrets = secrets;
+        this.presenters = new PresenterStore();
+    }
+
+    public BruteForce (Set<String> secrets,
+                       Set<String> salts,
+                       List<SecretKey> signingKeys,
+                       Attack scanConfiguration,
+                       SignedToken token,
+                       PresenterStore presenters) {
         this.secrets = secrets;
         this.salts = salts;
         this.signingKeys = signingKeys;
         this.scanConfiguration = scanConfiguration;
         this.token = token;
+        this.presenters = presenters;
+        presenters.register(this);
     }
 
     public List<TokenSigner> prepareAdvanced() {

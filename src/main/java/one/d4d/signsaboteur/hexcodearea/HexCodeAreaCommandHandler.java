@@ -14,9 +14,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-
-import static one.d4d.signsaboteur.utils.HexUtils.decodeHex;
-import static one.d4d.signsaboteur.utils.HexUtils.encodeHex;
+import java.util.HexFormat;
 
 /**
  * Class to handle copy and paste from a CodeArea to/from hexadecimal strings
@@ -52,7 +50,8 @@ class HexCodeAreaCommandHandler extends DefaultCodeAreaCommandHandler {
     @Override
     public void copy() {
         byte[] data = FormUtils.getCodeAreaData(codeArea);
-        Utils.copyToClipboard(encodeHex(data));
+        HexFormat hexFormat = HexFormat.of();
+        Utils.copyToClipboard(hexFormat.formatHex(data));
     }
 
     /**
@@ -62,7 +61,8 @@ class HexCodeAreaCommandHandler extends DefaultCodeAreaCommandHandler {
     public void cut() {
         byte[] data = FormUtils.getCodeAreaData(codeArea);
         super.cut();
-        Utils.copyToClipboard(encodeHex(data));
+        HexFormat hexFormat = HexFormat.of();
+        Utils.copyToClipboard(hexFormat.formatHex(data));
     }
 
     /**
@@ -76,7 +76,8 @@ class HexCodeAreaCommandHandler extends DefaultCodeAreaCommandHandler {
                 String clipboardData = (String) clipboard.getData(DataFlavor.stringFlavor);
 
                 if (Utils.isHex(clipboardData)) {
-                    pasteByteArray(decodeHex(clipboardData));
+                    HexFormat hexFormat = HexFormat.of();
+                    pasteByteArray(hexFormat.parseHex(clipboardData));
                 } else if (Utils.isBase64URL(clipboardData)) {
                     pasteByteArray(Base64URL.from(clipboardData).decode());
                 } else {

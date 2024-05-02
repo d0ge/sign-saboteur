@@ -77,7 +77,8 @@ public class Utils {
         try {
             MessageDigest msdDigest = MessageDigest.getInstance("SHA-1");
             msdDigest.update(token.getBytes(StandardCharsets.UTF_8));
-            return HexUtils.encodeHex(msdDigest.digest());
+            HexFormat hexFormat = HexFormat.of();
+            return hexFormat.formatHex(msdDigest.digest()).toUpperCase();
         }catch (NoSuchAlgorithmException e) {
             return token;
         }

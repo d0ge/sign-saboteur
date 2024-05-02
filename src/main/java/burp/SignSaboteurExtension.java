@@ -28,16 +28,16 @@ public class SignSaboteurExtension implements BurpExtension {
     @Override
     public void initialize(MontoyaApi api) {
         api.extension().setName(Utils.getResourceString("tool_name"));
+        PresenterStore presenters = new PresenterStore();
 
         Preferences preferences = api.persistence().preferences();
         BurpKeysModelPersistence keysModelPersistence = new BurpKeysModelPersistence(preferences);
         KeysModel keysModel = keysModelPersistence.loadOrCreateNew();
 
-        BurpConfigPersistence burpConfigPersistence = new BurpConfigPersistence(preferences);
+        BurpConfigPersistence burpConfigPersistence = new BurpConfigPersistence(preferences, presenters);
         BurpConfig burpConfig = burpConfigPersistence.loadOrCreateNew();
-        api.extension().registerUnloadingHandler(() -> burpConfigPersistence.save(burpConfig));
+        api.extension().registerUnloadingHandler(() -> burpConfigPersistence.unload(burpConfig));
 
-        PresenterStore presenters = new PresenterStore();
         UserInterface userInterface = api.userInterface();
         Window suiteWindow = userInterface.swingUtils().suiteFrame();
 

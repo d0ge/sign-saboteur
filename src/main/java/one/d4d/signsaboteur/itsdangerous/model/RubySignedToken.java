@@ -2,7 +2,8 @@ package one.d4d.signsaboteur.itsdangerous.model;
 
 import one.d4d.signsaboteur.itsdangerous.crypto.RubyTokenSigner;
 import one.d4d.signsaboteur.itsdangerous.crypto.Signers;
-import one.d4d.signsaboteur.utils.HexUtils;
+
+import java.util.HexFormat;
 
 public class RubySignedToken extends UnknownSignedToken {
 
@@ -20,7 +21,8 @@ public class RubySignedToken extends UnknownSignedToken {
 
     @Override
     public void resign() throws Exception {
-        this.signature = HexUtils.encodeHex(signer.get_signature_unsafe(message.getBytes()));
+        HexFormat hexFormat = HexFormat.of();
+        this.signature = hexFormat.formatHex(signer.get_signature_unsafe(message.getBytes()));
     }
 
     @Override

@@ -4,10 +4,10 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import one.d4d.signsaboteur.itsdangerous.BadSignatureException;
 import one.d4d.signsaboteur.itsdangerous.crypto.ExpressTokenSigner;
 import one.d4d.signsaboteur.itsdangerous.crypto.TornadoTokenSigner;
-import one.d4d.signsaboteur.utils.HexUtils;
 import one.d4d.signsaboteur.utils.Utils;
 
 import java.util.Base64;
+import java.util.HexFormat;
 
 public class TornadoSignedToken extends SignedToken {
     public static String formatVersion = "2";
@@ -82,7 +82,8 @@ public class TornadoSignedToken extends SignedToken {
     @Override
     public void resign() throws Exception {
         byte[] value = message.getBytes();
-        this.signature = HexUtils.encodeHex(signer.get_signature_unsafe(value));
+        HexFormat hexFormat = HexFormat.of();
+        this.signature = hexFormat.formatHex(signer.get_signature_unsafe(value));
     }
 
     @Override

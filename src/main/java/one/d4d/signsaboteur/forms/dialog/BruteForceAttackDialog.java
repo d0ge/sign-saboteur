@@ -4,6 +4,7 @@ import one.d4d.signsaboteur.itsdangerous.Attack;
 import one.d4d.signsaboteur.itsdangerous.BruteForce;
 import one.d4d.signsaboteur.itsdangerous.model.SignedToken;
 import one.d4d.signsaboteur.keys.SecretKey;
+import one.d4d.signsaboteur.presenter.PresenterStore;
 import one.d4d.signsaboteur.utils.ErrorLoggingActionListenerFactory;
 import one.d4d.signsaboteur.utils.Utils;
 
@@ -28,7 +29,8 @@ public class BruteForceAttackDialog extends AbstractDialog {
             Set<String> signingSalts,
             List<SecretKey> signingKeys,
             Attack mode,
-            SignedToken token
+            SignedToken token,
+            PresenterStore presenters
     ) {
         super(parent, "attack_dialog_title");
 
@@ -64,7 +66,7 @@ public class BruteForceAttackDialog extends AbstractDialog {
 
             @Override
             protected Void doInBackground() throws Exception {
-                bf = new BruteForce(signingSecrets, signingSalts, signingKeys, mode, token);
+                bf = new BruteForce(signingSecrets, signingSalts, signingKeys, mode, token, presenters);
                 SecretKey k = bf.parallel();
                 if (k != null) {
                     secretKey = k;

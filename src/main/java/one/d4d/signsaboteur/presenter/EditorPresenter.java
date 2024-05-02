@@ -411,7 +411,8 @@ public class EditorPresenter extends Presenter {
                 attackSalts,
                 keysPresenter.getSigningKeys(),
                 mode,
-                tokenObject);
+                tokenObject,
+                presenters);
         bruteForceDialog.display();
 
         SecretKey k = bruteForceDialog.getSecretKey();
