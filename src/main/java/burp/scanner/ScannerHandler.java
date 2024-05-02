@@ -23,6 +23,9 @@ import one.d4d.signsaboteur.utils.Utils;
 
 import java.util.*;
 
+import static burp.api.montoya.scanner.ConsolidationAction.KEEP_BOTH;
+import static burp.api.montoya.scanner.ConsolidationAction.KEEP_EXISTING;
+
 public class ScannerHandler implements ScanCheck {
     private final ScannerPresenter presenter;
     private final SignerConfig signerConfig;
@@ -45,8 +48,8 @@ public class ScannerHandler implements ScanCheck {
     }
 
     @Override
-    public ConsolidationAction consolidateIssues(AuditIssue auditIssue, AuditIssue auditIssue1) {
-        return null;
+    public ConsolidationAction consolidateIssues(AuditIssue newIssue, AuditIssue existingIssue) {
+        return existingIssue.detail().equals(newIssue.detail()) ? KEEP_EXISTING : KEEP_BOTH;
     }
 
     private List<AuditIssue> getRequestAuditIssues(HttpRequestResponse requestResponse) {

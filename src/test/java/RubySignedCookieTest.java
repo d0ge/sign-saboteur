@@ -1,21 +1,14 @@
-import burp.api.montoya.core.ByteArray;
-import one.d4d.signsaboteur.itsdangerous.Algorithms;
 import one.d4d.signsaboteur.itsdangerous.Attack;
 import one.d4d.signsaboteur.itsdangerous.BruteForce;
-import one.d4d.signsaboteur.itsdangerous.model.MutableSignedToken;
 import one.d4d.signsaboteur.itsdangerous.model.RubySignedToken;
-import one.d4d.signsaboteur.itsdangerous.model.SignedToken;
-import one.d4d.signsaboteur.itsdangerous.model.SignedTokenObjectFinder;
 import one.d4d.signsaboteur.keys.SecretKey;
-import one.d4d.signsaboteur.utils.Utils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.security.spec.KeySpec;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class RubySignedCookieTest {
 
@@ -92,7 +85,7 @@ public class RubySignedCookieTest {
     }
 
     @Test
-    void ActiveStorageBlodTest() {
+    void ActiveStorageBlobTest() {
         String secret = "645deb7dc7a12794104f5dbc61ae22037cd9b1def6a8ea4becb3761349a32d483717d56b91bd7e95a9190f4cab6ffa5f118baacf08ac3e1bc4a7a2c186011653";
         String salt = "ActiveStorage";
         String message = "eyJfcmFpbHMiOnsiZGF0YSI6eyJrZXkiOiJ2bnhzNmZsb2tpMWxhNjVkeTl3ODkwc2tzMHFhIiwiZGlzcG9zaXRpb24iOiJhdHRhY2htZW50OyBmaWxlbmFtZT1cInNlY3JldC50eHRcIjsgZmlsZW5hbWUqPVVURi04JydzZWNyZXQudHh0IiwiY29udGVudF90eXBlIjoidGV4dC9wbGFpbiIsInNlcnZpY2VfbmFtZSI6ImxvY2FsIn0sImV4cCI6IjIwMjQtMDQtMjRUMTY6MjQ6MzUuMjMzWiIsInB1ciI6ImJsb2Jfa2V5In19";

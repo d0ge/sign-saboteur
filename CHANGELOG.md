@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.4] - 2024-05-02
+
+### Changed
+
+- Code refactoring
+
 ## [1.0.3] - 2024-04-25
 
 ### Added
