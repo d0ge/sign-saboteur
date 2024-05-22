@@ -6,6 +6,7 @@ and Unknown signed string.
 
 You can find more information about the extension on the Portswigger Research blog post page - [Introducing SignSaboteur: forge signed web tokens with ease](https://portswigger.net/research/introducing-signsaboteur-forge-signed-web-tokens-with-ease).
 
+
 It provides automatic detection and in-line editing of token within HTTP requests/responses and WebSocket messages,
 signing of tokens and automation of brute force attacks against signed tokens implementations.
 
