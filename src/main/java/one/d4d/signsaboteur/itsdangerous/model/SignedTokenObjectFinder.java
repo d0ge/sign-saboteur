@@ -507,8 +507,8 @@ public class SignedTokenObjectFinder {
         if (separator == 0) return Optional.empty();
         int index = text.lastIndexOf(separator);
         String message = text.substring(0, index);
-        boolean isUrlencoded = message.indexOf('%') > -1;
         if (message.isEmpty()) return Optional.empty();
+        boolean isUrlencoded = message.indexOf('%') > -1;
         String signature = text.substring(index + 1);
         try {
             byte[] sign = Utils.normalization(signature.getBytes());

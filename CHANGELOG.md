@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.5] - 2024-05-22
+
+### Changed
+
+- Passive scan is disabled by default now
+
 ## [1.0.4] - 2024-05-02
 
 ### Changed

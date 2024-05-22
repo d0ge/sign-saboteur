@@ -96,7 +96,7 @@ public class SignSaboteurExtension implements BurpExtension {
                 proxyWebSocketCreation.proxyWebSocket().registerProxyMessageHandler(proxyWsMessageHandler)
         );
 
-        if (isProVersion) {
+        if (isProVersion && proxyConfig.enablePassiveScan()) {
             ScannerHandler scannerHandler = new ScannerHandler(presenters, signerConfig);
             scanner.registerScanCheck(scannerHandler);
         }

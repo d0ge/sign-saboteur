@@ -31,6 +31,7 @@ public class SettingsView {
     private JCheckBox checkBoxEnableRubySignedString;
     private JCheckBox checkBoxEnableJWT;
     private JCheckBox checkBoxNIMBUSDS;
+    private JCheckBox checkBoxPassiveScan;
 
     public SettingsView(Window parent, BurpConfig burpConfig, UserInterface userInterface) {
         this.parent = parent;
@@ -41,6 +42,10 @@ public class SettingsView {
         checkBoxHighlightToken.addActionListener(e -> {
             comboBoxHighlightColor.setEnabled(checkBoxHighlightToken.isSelected());
             proxyConfig.setHighlightToken(checkBoxHighlightToken.isSelected());
+        });
+        checkBoxPassiveScan.setSelected(proxyConfig.enablePassiveScan());
+        checkBoxPassiveScan.addActionListener(e -> {
+            proxyConfig.disablePassiveScan(checkBoxPassiveScan.isSelected());
         });
 
         comboBoxHighlightColor.setModel(new DefaultComboBoxModel<>(HighlightColor.values()));

@@ -14,11 +14,22 @@ public class ProxyConfig {
     @Expose
     private boolean highlightToken;
     @Expose
+    private boolean enablePassiveScan;
+    @Expose
     private HighlightColor highlightColor;
 
     public ProxyConfig() {
         this.highlightToken = true;
+        this.enablePassiveScan = false;
         this.highlightColor = DEFAULT_HIGHLIGHT_COLOR;
+    }
+
+    public boolean enablePassiveScan() {
+        return enablePassiveScan;
+    }
+
+    public void disablePassiveScan(boolean enablePassiveScan) {
+        this.enablePassiveScan = enablePassiveScan;
     }
 
     public boolean highlightToken() {
