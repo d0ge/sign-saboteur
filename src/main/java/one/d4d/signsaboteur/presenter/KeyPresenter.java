@@ -53,6 +53,9 @@ public class KeyPresenter extends Presenter {
     public void onButtonLoadSecretsClick(ActionEvent e) {
         readSecretsFromFile(e);
     }
+    public void onButtonLoadDefaultsSecretsClick(ActionEvent e) {
+        readDefaultSecrets();
+    }
 
     public void onButtonAddSecretsClick(ActionEvent e) {
         NewWordDialog d = new NewWordDialog(view.getParent());
@@ -86,6 +89,9 @@ public class KeyPresenter extends Presenter {
 
     public void onButtonLoadSaltsClick(ActionEvent e) {
         readSaltsFromFile(e);
+    }
+    public void onButtonLoadDefaultsSaltsClick(ActionEvent e) {
+        readDefaultSalts();
     }
 
     public void onButtonAddSaltsClick(ActionEvent e) {
@@ -175,37 +181,63 @@ public class KeyPresenter extends Presenter {
         Utils.copyToClipboard(prettyPrintJSON(key.toJSONString()));
     }
 
+    private void readDefaultSecrets() {
+        Set<String> s = Utils.readResourceForClass("/secrets", this.getClass());
+        if (!s.isEmpty()) {
+            model.setSecrets(s);
+            model.setSecretsFilePath("");
+            modelSecrets.clear();
+            modelSecrets.addAll(s);
+            view.getSecretsTextArea().setText("");
+            keysModelPersistence.save(model);
+        }
+    }
     private void readSecretsFromFile(ActionEvent e) {
         JFileChooser fc = new JFileChooser();
         int returnVal = fc.showOpenDialog(view.getUiComponent());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fc.getSelectedFile();
-            Set<String> s = Utils.deserializeFile(selectedFile);
-            if (!s.isEmpty()) {
-                model.setSecrets(s);
-                model.setSecretsFilePath(selectedFile.getAbsolutePath());
-                modelSecrets.clear();
-                modelSecrets.addAll(s);
-                view.getSecretsTextArea().setText(selectedFile.getAbsolutePath());
-                keysModelPersistence.save(model);
+            try {
+                Set<String> s = Utils.deserializeFile(selectedFile);
+                if (!s.isEmpty()) {
+                    model.setSecrets(s);
+                    model.setSecretsFilePath(selectedFile.getAbsolutePath());
+                    modelSecrets.clear();
+                    modelSecrets.addAll(s);
+                    view.getSecretsTextArea().setText(selectedFile.getAbsolutePath());
+                    keysModelPersistence.save(model);
+                }
+            } catch (Exception ignored) {
             }
         }
     }
-
+    private void readDefaultSalts() {
+        Set<String> s = Utils.readResourceForClass("/salts", this.getClass());
+        if (!s.isEmpty()) {
+            model.setSalts(s);
+            model.setSaltsFilePath("");
+            modelSalts.clear();
+            modelSalts.addAll(s);
+            view.getSaltsTextArea().setText("");
+            keysModelPersistence.save(model);
+        }
+    }
     private void readSaltsFromFile(ActionEvent e) {
         JFileChooser fc = new JFileChooser();
         int returnVal = fc.showOpenDialog(view.getUiComponent());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fc.getSelectedFile();
-            Set<String> s = Utils.deserializeFile(selectedFile);
-            if (!s.isEmpty()) {
-                model.setSalts(s);
-                model.setSaltsFilePath(selectedFile.getAbsolutePath());
-                modelSalts.clear();
-                modelSalts.addAll(s);
-                view.getSaltsTextArea().setText(selectedFile.getAbsolutePath());
-                keysModelPersistence.save(model);
-            }
+            try {
+                Set<String> s = Utils.deserializeFile(selectedFile);
+                if (!s.isEmpty()) {
+                    model.setSalts(s);
+                    model.setSaltsFilePath(selectedFile.getAbsolutePath());
+                    modelSalts.clear();
+                    modelSalts.addAll(s);
+                    view.getSaltsTextArea().setText(selectedFile.getAbsolutePath());
+                    keysModelPersistence.save(model);
+                }
+            } catch (Exception ignored) {}
         }
     }
 

@@ -454,7 +454,7 @@ public class Utils {
     }
 
 
-    public static Set<String> deserializeFile(File f) {
+    public static Set<String> deserializeFile(File f) throws Exception{
         Set<String> result = new HashSet<>();
         Gson gson = new Gson();
         try (Stream<String> lines = Files.lines(f.toPath())) {
@@ -466,7 +466,7 @@ public class Utils {
                 }
             });
         } catch (IOException ex) {
-            return result;
+            throw new Exception();
         }
         return result;
     }

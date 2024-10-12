@@ -31,21 +31,29 @@ public class BurpKeysModelPersistence {
 
         Gson gson = GsonHelper.customGson;
         KeysModel keysModel = gson.fromJson(json, KeysModel.class);
-        if (keysModel.getSaltsFilePath() != null) {
-            Set<String> result = Utils.deserializeFile(new File(keysModel.getSaltsFilePath()));
-            if (result.isEmpty()) {
-                keysModel.setSalts(loadDefaultSalts());
-            } else {
-                keysModel.setSalts(result);
+        try {
+            if (keysModel.getSaltsFilePath() != null) {
+                Set<String> result = Utils.deserializeFile(new File(keysModel.getSaltsFilePath()));
+                if (result.isEmpty()) {
+                    keysModel.setSalts(loadDefaultSalts());
+                } else {
+                    keysModel.setSalts(result);
+                }
             }
+        } catch (Exception e) {
+            keysModel.setSalts(loadDefaultSalts());
         }
-        if (keysModel.getSecretsFilePath() != null) {
-            Set<String> result = Utils.deserializeFile(new File(keysModel.getSecretsFilePath()));
-            if (result.isEmpty()) {
-                keysModel.setSecrets(loadDefaultSecrets());
-            } else {
-                keysModel.setSecrets(result);
+        try {
+            if (keysModel.getSecretsFilePath() != null) {
+                Set<String> result = Utils.deserializeFile(new File(keysModel.getSecretsFilePath()));
+                if (result.isEmpty()) {
+                    keysModel.setSecrets(loadDefaultSecrets());
+                } else {
+                    keysModel.setSecrets(result);
+                }
             }
+        } catch (Exception e) {
+            keysModel.setSecrets(loadDefaultSecrets());
         }
         return keysModel;
     }
