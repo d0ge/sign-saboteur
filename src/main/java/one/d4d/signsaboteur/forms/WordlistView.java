@@ -42,6 +42,8 @@ public class WordlistView {
     private JButton secretsAddButton;
     private JButton saltsAddButton;
     private JButton buttonLoadDefaults;
+    private JButton secretsLoadDefaultsButton;
+    private JButton saltsLoadDefaultsButton;
     private JMenuItem menuItemDelete;
     private JMenuItem menuItemCopy;
 
@@ -82,11 +84,13 @@ public class WordlistView {
                 modelSalts);
 
         secretsLoadButton.addActionListener(presenter::onButtonLoadSecretsClick);
+        secretsLoadDefaultsButton.addActionListener(presenter::onButtonLoadDefaultsSecretsClick);
         secretsAddButton.addActionListener(presenter::onButtonAddSecretsClick);
         secretsRemoveButton.addActionListener(presenter::onButtonRemoveSecretsClick);
         secretsCleanButton.addActionListener(presenter::onButtonCleanSecretsClick);
 
         saltsLoadButton.addActionListener(presenter::onButtonLoadSaltsClick);
+        saltsLoadDefaultsButton.addActionListener(presenter::onButtonLoadDefaultsSaltsClick);
         saltsAddButton.addActionListener(presenter::onButtonAddSaltsClick);
         saltsRemoveButton.addActionListener(presenter::onButtonRemoveSaltsClick);
         saltsCleanButton.addActionListener(presenter::onButtonCleanSaltsClick);
