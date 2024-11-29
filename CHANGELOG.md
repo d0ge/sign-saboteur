@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.6] - 2024-11-29
+
+### Added
+
+- Load default secrets and salts
+- Encrypted Ruby Rails tokens
+
+### Changed
+
+- Ruby on rails brute force logic
+
 ## [1.0.5] - 2024-05-22
 
 ### Changed

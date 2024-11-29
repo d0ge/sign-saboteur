@@ -19,6 +19,7 @@ public class SignUnsignTest {
             long start = System.currentTimeMillis();
             for (Algorithms a : Algorithms.values()) {
                 for (Derivation d : Derivation.values()) {
+                    if (d == Derivation.RUBY_ENCRYPTION) continue;
                     for (MessageDerivation md : MessageDerivation.values()) {
                         for (MessageDigestAlgorithm mda : MessageDigestAlgorithm.values()) {
                             byte[] secret = "secret".getBytes();

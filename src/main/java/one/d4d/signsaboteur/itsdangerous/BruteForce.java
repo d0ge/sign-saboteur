@@ -2,6 +2,7 @@ package one.d4d.signsaboteur.itsdangerous;
 
 import com.google.common.collect.Lists;
 import one.d4d.signsaboteur.itsdangerous.crypto.TokenSigner;
+import one.d4d.signsaboteur.itsdangerous.model.RubyEncryptedToken;
 import one.d4d.signsaboteur.itsdangerous.model.SignedToken;
 import one.d4d.signsaboteur.itsdangerous.model.UnknownSignedToken;
 import one.d4d.signsaboteur.keys.SecretKey;
@@ -9,10 +10,7 @@ import one.d4d.signsaboteur.presenter.Presenter;
 import one.d4d.signsaboteur.presenter.PresenterStore;
 import one.d4d.signsaboteur.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class BruteForce extends Presenter {
@@ -52,10 +50,24 @@ public class BruteForce extends Presenter {
         presenters.register(this);
     }
 
+    public List<TokenSigner> prepareEncryption() {
+        List<TokenSigner> attacks = new ArrayList<>();
+        TokenSigner is = token.getSigner();
+        this.signingKeys.forEach(key -> {
+            TokenSigner ks = new TokenSigner(key);
+            attacks.add(ks);
+        });
+        secrets.forEach(secret ->
+                is.getKnownDerivations().forEach(d -> attacks.addAll(is.cloneWithSaltDerivation(secret, salts, d)))
+        );
+        return attacks;
+    }
+
     public List<TokenSigner> prepareAdvanced() {
         List<TokenSigner> attacks = new ArrayList<>();
 
         List<Derivation> derivations = new ArrayList<>(List.of(Derivation.values()));
+        derivations.remove(Derivation.RUBY_ENCRYPTION);
 
         Set<MessageDerivation> messages = new HashSet<>(List.of(MessageDerivation.NONE));
 
@@ -112,7 +124,7 @@ public class BruteForce extends Presenter {
 
     public SecretKey parallel() {
         int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
-        List<TokenSigner> attacks = prepareAdvanced();
+        List<TokenSigner> attacks = token instanceof RubyEncryptedToken ? prepareEncryption() : prepareAdvanced();
         if (NUMBER_OF_CORES < 2) {
             return search(attacks);
         }

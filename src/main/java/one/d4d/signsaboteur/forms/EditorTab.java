@@ -83,6 +83,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     private RSyntaxTextArea textAreaJSONWebSignaturePayload;
     private JCheckBox checkBoxUnknownURLEncoded;
     private JCheckBox checkBoxRubyURLEncoded;
+    private JButton decryptButton;
     private CodeArea codeAreaDangerousSignature;
     private CodeArea codeAreaDangerousSeparator;
     private CodeArea codeAreaOAuthSignature;
@@ -108,6 +109,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         this.signerConfig = signerConfig;
         this.presenter = new EditorPresenter(
                 this,
+                rstaFactory,
                 collaboratorPayloadGenerator,
                 actionListenerFactory,
                 presenters,
@@ -168,6 +170,7 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
         buttonSign.addActionListener(e -> presenter.onSignClicked());
         buttonAttack.addActionListener(e -> presenter.onAttackClicked());
         buttonCopyExpressSignature.addActionListener(e -> presenter.copyExpressSignature());
+        decryptButton.addActionListener(e -> presenter.decryptRubyMessage());
     }
 
     public Window window() {
@@ -344,6 +347,9 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
     public boolean getRubyIsURLEncoded() {
         return checkBoxRubyURLEncoded.isSelected();
     }
+    public boolean getRubyIsEncrypted() {
+        return decryptButton.isEnabled();
+    }
 
     public void setRubyIsURLEncoded(boolean enabled) {
         checkBoxRubyURLEncoded.setSelected(enabled);
@@ -363,6 +369,10 @@ public abstract class EditorTab implements ExtensionProvidedEditor {
 
     public void setRubySeparator(byte[] separator) {
         codeAreaRubySeparator.setData(new ByteArrayEditableData(separator));
+    }
+
+    public void setRubyDecryptButton(boolean enabled) {
+        decryptButton.setEnabled(enabled);
     }
 
     public String getJWTHeader() {

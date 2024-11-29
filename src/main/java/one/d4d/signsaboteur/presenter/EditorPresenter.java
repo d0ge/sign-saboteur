@@ -12,6 +12,7 @@ import one.d4d.signsaboteur.itsdangerous.Attack;
 import one.d4d.signsaboteur.itsdangerous.model.*;
 import one.d4d.signsaboteur.keys.Key;
 import one.d4d.signsaboteur.keys.SecretKey;
+import one.d4d.signsaboteur.rsta.RstaFactory;
 import one.d4d.signsaboteur.utils.ErrorLoggingActionListenerFactory;
 import one.d4d.signsaboteur.utils.Utils;
 
@@ -33,11 +34,13 @@ public class EditorPresenter extends Presenter {
     private final CollaboratorPayloadGenerator collaboratorPayloadGenerator;
     private final ErrorLoggingActionListenerFactory actionListenerFactory;
     private final MessageDialogFactory messageDialogFactory;
+    private final RstaFactory rstaFactory;
     private boolean selectionChanging;
     private URL targetURL;
 
     public EditorPresenter(
             EditorTab view,
+            RstaFactory rstaFactory,
             CollaboratorPayloadGenerator collaboratorPayloadGenerator,
             ErrorLoggingActionListenerFactory actionListenerFactory,
             PresenterStore presenters,
@@ -45,6 +48,7 @@ public class EditorPresenter extends Presenter {
         this.view = view;
         this.model = new EditorModel(signerConfig);
         this.collaboratorPayloadGenerator = collaboratorPayloadGenerator;
+        this.rstaFactory = rstaFactory;
         this.actionListenerFactory = actionListenerFactory;
         this.presenters = presenters;
         messageDialogFactory = new MessageDialogFactory(view.uiComponent());
@@ -167,31 +171,43 @@ public class EditorPresenter extends Presenter {
         view.setTornadoSignature(token.getSignature());
     }
 
-    private RubySignedToken getRuby() {
+    private SignedToken getRuby() {
 //        String message = URLEncoder.encode(Base64.getUrlEncoder().encodeToString(view.getRubyMessage().getBytes()), StandardCharsets.UTF_8);
         boolean isURLEncoded = view.getRubyIsURLEncoded();
-        String message = Base64.getUrlEncoder().encodeToString(Utils.compactJSON(view.getRubyMessage()).getBytes());
-        if(isURLEncoded) {
-            message = URLEncoder.encode(message, StandardCharsets.UTF_8);
+        boolean isEncrypted = view.getRubyIsEncrypted();
+        if (isEncrypted) {
+            String message = view.getRubyMessage();
+            String signature = view.getRubySignature();
+            byte[] separator = view.getRubySeparator().length == 0 ? new byte[]{'-','-'} : view.getRubySeparator();
+            return new RubyEncryptedToken(message, signature, separator, isURLEncoded);
+        } else {
+            String message = Base64.getUrlEncoder().encodeToString(Utils.compactJSON(view.getRubyMessage()).getBytes());
+            String signature = view.getRubySignature();
+            byte[] separator = view.getRubySeparator().length == 0 ? new byte[]{'-','-'} : view.getRubySeparator();
+            return new RubySignedToken(message, signature, separator, isURLEncoded);
         }
-        String signature = view.getRubySignature();
-        byte[] separator = view.getRubySeparator().length == 0 ? new byte[]{46} : view.getRubySeparator();
-        return new RubySignedToken(message, signature, separator, isURLEncoded);
     }
 
-    private void setRuby(RubySignedToken token) {
-//        view.setRubyMessage(new String(Base64.getUrlDecoder().decode(URLDecoder.decode(token.getEncodedMessage(), StandardCharsets.UTF_8))));
-        boolean isURLEncoded = token.isURLEncoded();
-        String message = token.getEncodedMessage();
-        if (isURLEncoded) {
-            message = URLDecoder.decode(token.getEncodedMessage(), StandardCharsets.UTF_8);
+    private void setRuby(SignedToken token) {
+        if (token instanceof RubySignedToken signedToken) {
+            //        view.setRubyMessage(new String(Base64.getUrlDecoder().decode(URLDecoder.decode(token.getEncodedMessage(), StandardCharsets.UTF_8))));
+            boolean isURLEncoded = signedToken.isURLEncoded();
+            String message = signedToken.getEncodedMessage();
+            message = new String(Base64.getUrlDecoder().decode(message));
+            message = Utils.prettyPrintJSON(message);
+            view.setRubyDecryptButton(false);
+            view.setRubyIsURLEncoded(isURLEncoded);
+            view.setRubyMessage(message);
+            view.setRubySignature(signedToken.getEncodedSignature());
+            view.setRubySeparator(signedToken.getSeparator());
         }
-        message = new String(Base64.getUrlDecoder().decode(message));
-        message = Utils.prettyPrintJSON(message);
-        view.setRubyMessage(message);
-        view.setRubySignature(token.getEncodedSignature());
-        view.setRubySeparator(token.getSeparator());
-        view.setUnknownIsURLEncoded(isURLEncoded);
+        if (token instanceof RubyEncryptedToken encryptedToken) {
+            view.setRubyDecryptButton(true);
+            view.setRubyIsURLEncoded(encryptedToken.isURLEncoded());
+            view.setRubyMessage(encryptedToken.getEncodedMessage());
+            view.setRubySignature(encryptedToken.getEncodedSignature());
+            view.setRubySeparator(encryptedToken.getSeparator());
+        }
     }
 
     private JSONWebSignature getJSONWebSignature() {
@@ -261,9 +277,9 @@ public class EditorPresenter extends Presenter {
         } else if (tokenObject instanceof TornadoSignedToken) {
             view.setTornadoMode();
             setTornado((TornadoSignedToken) tokenObject);
-        } else if (tokenObject instanceof RubySignedToken) {
+        } else if (tokenObject instanceof RubySignedToken || tokenObject instanceof RubyEncryptedToken) {
             view.setRubyMode();
-            setRuby((RubySignedToken) tokenObject);
+            setRuby(tokenObject);
         } else if (tokenObject instanceof JSONWebSignature) {
             view.setJWTMode();
             setJSONWebSignature((JSONWebSignature) tokenObject);
@@ -285,6 +301,8 @@ public class EditorPresenter extends Presenter {
     public void onAttackClicked() {
         attackDialog();
     }
+
+    public void decryptRubyMessage() { decryptDialog(); }
 
     private void attackDialog() {
         KeyPresenter keysPresenter = (KeyPresenter) presenters.get(KeyPresenter.class);
@@ -340,7 +358,7 @@ public class EditorPresenter extends Presenter {
         MutableSignedToken mutableJoseObject = model.getSignedTokenObject(view.getSelectedSignedTokenObjectIndex());
         SignedToken tokenObject = mutableJoseObject.getModified();
 
-        if (keysPresenter.getSigningKeys().size() == 0) {
+        if (keysPresenter.getSigningKeys().isEmpty()) {
             messageDialogFactory.showWarningDialog("error_title_no_signing_keys", "error_no_signing_keys");
             return;
         }
@@ -378,6 +396,27 @@ public class EditorPresenter extends Presenter {
                 setUnknown((UnknownSignedToken) signed);
             }
         }
+    }
+
+    private void decryptDialog() {
+        KeyPresenter keysPresenter = (KeyPresenter) presenters.get(KeyPresenter.class);
+
+        MutableSignedToken mutableJoseObject = model.getSignedTokenObject(view.getSelectedSignedTokenObjectIndex());
+        SignedToken tokenObject = mutableJoseObject.getModified();
+
+        if (keysPresenter.getSigningKeys().isEmpty()) {
+            messageDialogFactory.showWarningDialog("error_title_no_signing_keys", "error_no_signing_keys");
+            return;
+        }
+
+        EncryptionDialog signDialog = new EncryptionDialog(
+                view.window(),
+                rstaFactory,
+                actionListenerFactory,
+                keysPresenter.getSigningKeys(),
+                tokenObject
+        );
+        signDialog.display();
     }
 
     public void onAttackClicked(Attack mode) {

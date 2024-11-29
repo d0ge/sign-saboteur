@@ -85,8 +85,12 @@ public class SignedTokenObjectFinder {
                         .ifPresent(value -> {
                             if(signedTokensObjects.stream().noneMatch(test -> test.getOriginal().equalsIgnoreCase(candidate.toString())))
                                 signedTokensObjects.add(new MutableSignedToken(candidate.toString(), value));
-                            }
-                        );
+                        });
+                parseRubyEncryptedToken("", candidate.toString())
+                        .ifPresent(value -> {
+                        if(signedTokensObjects.stream().noneMatch(test -> test.getOriginal().equalsIgnoreCase(candidate.toString())))
+                            signedTokensObjects.add(new MutableSignedToken(candidate.toString(), value));
+                        });
             }
 
         }
@@ -529,16 +533,44 @@ public class SignedTokenObjectFinder {
             String signature = parts[1];
             boolean isURLEncoded = payload.indexOf('%') > -1;
             try {
-                String tmp = payload;
-                if (isURLEncoded) tmp = URLDecoder.decode(payload, StandardCharsets.UTF_8);
-                Base64.getUrlDecoder().decode(tmp);
-                byte[] sign = Utils.normalization((URLDecoder.decode(signature, StandardCharsets.UTF_8)).getBytes());
+                if (isURLEncoded) {
+                    payload = URLDecoder.decode(payload, StandardCharsets.UTF_8);
+                }
+                byte[] sign = Utils.normalization(signature.getBytes(StandardCharsets.UTF_8));
                 if (sign == null) return Optional.empty();
                 if (Arrays.stream(SIGNATURES_LENGTH).noneMatch(x -> x == sign.length)) return Optional.empty();
             } catch (Exception e) {
                 return Optional.empty();
             }
             RubySignedToken t = new RubySignedToken(payload, signature, isURLEncoded);
+            return Optional.of(t);
+        }
+
+        return Optional.empty();
+    }
+
+    public static Optional<SignedToken> parseRubyEncryptedToken(String key, String value) {
+        String[] parts = value.split("--");
+        if (parts.length == 3) {
+            String payload = parts[0];
+            String iv = parts[1];
+            String signature = parts[2];
+            boolean isURLEncoded = payload.indexOf('%') > -1;
+            try {
+                if (isURLEncoded) {
+                    payload = URLDecoder.decode(payload, StandardCharsets.UTF_8);
+                    iv = URLDecoder.decode(iv, StandardCharsets.UTF_8);
+                    signature = URLDecoder.decode(signature, StandardCharsets.UTF_8);
+                }
+                Base64.getDecoder().decode(payload);
+                Base64.getDecoder().decode(iv);
+                Base64.getDecoder().decode(signature);
+
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+            if (iv.length() != 16 ) return Optional.empty();
+            RubyEncryptedToken t = new RubyEncryptedToken(payload + "--" + iv, signature, isURLEncoded);
             return Optional.of(t);
         }
 
