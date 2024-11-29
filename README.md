@@ -1,7 +1,7 @@
 # SignSaboteur
 
 SignSaboteur is a Burp Suite extension for editing, signing, verifying, and attacking signed tokens. 
-It supports different types of tokens: [Django TimestampSigner](https://docs.djangoproject.com/en/5.0/topics/signing/#verifying-timestamped-values), [ItsDangerous Signer](https://itsdangerous.palletsprojects.com/en/2.1.x/signer/), [Express cookie-session middleware](https://expressjs.com/en/resources/middleware/cookie-session.html), [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy), [Tornado’s signed cookies](https://www.tornadoweb.org/en/stable/guide/security.html), [Ruby Rails Signed cookies](https://api.rubyonrails.org/classes/ActiveSupport/MessageVerifier.html), [Nimbus JOSE + JWT](https://bitbucket.org/connect2id/nimbus-jose-jwt/src/master/)
+It supports different types of tokens: [Django TimestampSigner](https://docs.djangoproject.com/en/5.0/topics/signing/#verifying-timestamped-values), [ItsDangerous Signer](https://itsdangerous.palletsprojects.com/en/2.1.x/signer/), [Express cookie-session middleware](https://expressjs.com/en/resources/middleware/cookie-session.html), [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy), [Tornado’s signed cookies](https://www.tornadoweb.org/en/stable/guide/security.html), [Ruby Rails Signed cookies](https://api.rubyonrails.org/classes/ActiveSupport/MessageVerifier.html), [Ruby Rails Encrypted cookies](https://api.rubyonrails.org/v5.2.3/classes/ActiveSupport/MessageEncryptor.html), [Nimbus JOSE + JWT](https://bitbucket.org/connect2id/nimbus-jose-jwt/src/master/)
 and Unknown signed string.
 
 You can find more information about the extension on the Portswigger Research blog post page - [Introducing SignSaboteur: forge signed web tokens with ease](https://portswigger.net/research/introducing-signsaboteur-forge-signed-web-tokens-with-ease).
@@ -17,7 +17,7 @@ found [here](https://github.com/blackberry/jwt-editor) and [here](https://github
 
 * Ensure that Java JDK 17 or newer is installed
 * From root of project, run the command `./gradlew jar`
-* This should place the JAR file `sign-saboteur-1.0.5.jar` within the `build/libs` directory
+* This should place the JAR file `sign-saboteur-1.0.6.jar` within the `build/libs` directory
 * This can be loaded into Burp by navigating to the `Extensions` tab, `Installed` sub-tab, clicking `Add` and loading
   the JAR file
 * This BApp is using the newer Montoya API, so it's best to use the latest version of Burp (try the earlier adopter

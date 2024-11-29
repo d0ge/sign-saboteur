@@ -229,6 +229,16 @@ public class TokenSigner implements Cloneable {
                     SecretKeyFactory f = SecretKeyFactory.getInstance(String.format("PBKDF2With%s", PRF));
                     return f.generateSecret(spec).getEncoded();
                 }
+                case RUBY_ENCRYPTION -> {
+                    KeySpec spec = new PBEKeySpec(
+                            (new String(secret_key)).toCharArray(),
+                            salt,
+                            1000,
+                            32 * 8
+                    );
+                    SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+                    return f.generateSecret(spec).getEncoded();
+                }
                 default -> throw new DerivationException("Unknown key derivation method");
             }
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -325,7 +335,8 @@ public class TokenSigner implements Cloneable {
                 new String(sep),
                 digestMethod,
                 keyDerivation,
-                messageDerivation, messageDigestAlgorithm);
+                messageDerivation,
+                messageDigestAlgorithm);
     }
     public SecretKey getKey() {
         return new SecretKey(
@@ -335,7 +346,8 @@ public class TokenSigner implements Cloneable {
                 new String(sep),
                 digestMethod,
                 keyDerivation,
-                messageDerivation, messageDigestAlgorithm);
+                messageDerivation,
+                messageDigestAlgorithm);
     }
 
     @Override
@@ -353,6 +365,30 @@ public class TokenSigner implements Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    public List<TokenSigner> cloneWithSaltDerivation(byte[] secret, List<byte[]> salts) {
+        List<TokenSigner> copies = new ArrayList<>();
+        if (keyDerivation == Derivation.NONE || keyDerivation == Derivation.HASH) {
+            TokenSigner s = this.clone();
+            s.setSecretKey(secret);
+            copies.add(s);
+        } else {
+            salts.forEach(salt -> {
+                TokenSigner s = this.clone();
+                s.setSecretKey(secret);
+                s.setSalt(salt);
+                copies.add(s);
+            });
+        }
+        return copies;
+    }
+    public List<TokenSigner> cloneWithSaltDerivation(
+            byte[] secret,
+            List<byte[]> salts,
+            Derivation keyDerivation) {
+        this.keyDerivation = keyDerivation;
+        return this.cloneWithSaltDerivation(secret, salts);
     }
 
     public List<TokenSigner> cloneWithSaltDerivation(String secret, Set<String> salts) {

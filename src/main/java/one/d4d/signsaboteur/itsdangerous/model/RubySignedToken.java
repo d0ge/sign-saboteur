@@ -3,6 +3,8 @@ package one.d4d.signsaboteur.itsdangerous.model;
 import one.d4d.signsaboteur.itsdangerous.crypto.RubyTokenSigner;
 import one.d4d.signsaboteur.itsdangerous.crypto.Signers;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 
 public class RubySignedToken extends UnknownSignedToken {
@@ -24,6 +26,12 @@ public class RubySignedToken extends UnknownSignedToken {
         HexFormat hexFormat = HexFormat.of();
         this.signature = hexFormat.formatHex(signer.get_signature_unsafe(message.getBytes()));
     }
+    @Override
+    public String serialize() {
+        String raw = isURLEncoded ? URLEncoder.encode(message, StandardCharsets.UTF_8) : message;
+        return String.format("%s%s%s", raw, new String(separator), signature);
+    }
+
 
     @Override
     public String getEncodedSignature() {

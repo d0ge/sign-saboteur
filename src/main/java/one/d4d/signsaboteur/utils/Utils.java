@@ -70,7 +70,7 @@ public class Utils {
     }
 
     public static List<ByteArray> searchByteArrayRuby(ByteArray data) {
-        return searchByteArray(data, Sets.union(BASE64_URL_SET, Set.of(37, 61)) , 28);
+        return searchByteArray(data, Sets.union(BASE64_URL_SET, Set.of(37)) , 28);
     }
 
     public static String getSignedTokenIDWithHash(String token)  {
